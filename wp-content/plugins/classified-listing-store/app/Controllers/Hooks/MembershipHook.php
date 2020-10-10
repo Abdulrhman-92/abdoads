@@ -157,9 +157,14 @@ class MembershipHook
                 } elseif (!$member && Functions::get_option_item('rtcl_account_settings', 'enable_post_for_unregister', false, 'checkbox')) {
                     Functions::add_notice(apply_filters('rtcl_remaining_free_ads_success_text', sprintf(__('You have %s free ads.', 'classified-listing-store'), $enable_free_ads),
                         $enable_free_ads, $member), 'success');
-                } else {
+                } elseif ($remaining_ads = $member->is_valid_to_post()) {
+                    Functions::add_notice(apply_filters('rtcl_remaining_regular_ads_success_text',
+                        sprintf(__('You have %s regular ads.', 'classified-listing-store'), $remaining_ads),
+                        $remaining_ads, $member), 'success');
+                }else{
+
                     Functions::add_notice(apply_filters('rtcl_remaining_free_ads_error_text',
-                        sprintf(__('You have no free ads remaining. You can buy a subscription to post ad. <a href="%s">Buy a subscription.</a>', 'classified-listing-store'),
+                        sprintf(__('You have no free ads remainin You can buy a subscription to post ad. <a href="%s">Buy a subscription.</a>', 'classified-listing-store'),
                             Link::get_checkout_endpoint_url('membership')),
                         $member), 'error');
                 }

@@ -104,7 +104,7 @@ class Membership
     // set number of free ads for not subscriber only
     public function is_valid_to_post_as_free() {
         $this->set_settings();
-        if (isset($this->settings['enable_free_ads']) && $this->settings['enable_free_ads'] == "yes"&&$this->has_membership()==0) {
+        if (isset($this->settings['enable_free_ads']) && $this->settings['enable_free_ads'] == "yes"&&$this->has_membership() == 0) {
             $ads = $this->get_posted_ads_as_free();
             $limit_ads = isset($this->settings['number_of_free_ads']) ? absint($this->settings['number_of_free_ads']) : 3;
             $remaining = $limit_ads - $ads;
