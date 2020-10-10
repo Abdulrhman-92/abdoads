@@ -37,7 +37,7 @@ class MembershipHook
      * @param Pricing $pricing
      *
      * @return array
-     */
+    */
     static function add_meta_to_membership_payment($new_payment_args, $pricing) {
         if ($pricing && 'membership' === $pricing->getType()) {
             $new_payment_args['meta_input']['payment_type'] = 'membership';
@@ -100,7 +100,32 @@ class MembershipHook
         $member = rtclStore()->factory->get_membership();
         $enable_free_ads = Functions::get_option_item('rtcl_membership_settings', 'enable_free_ads', false, 'checkbox');
         $enable_unlimited_free_ads_for_membership = Functions::get_option_item('rtcl_membership_settings', 'unlimited_free_ads_membership', false, 'checkbox');
-        if ($member && $member->has_membership()) {
+       
+        if ($member && $member->has_membership() == 1) {
+            $allow_free_ads = false;
+
+            if (($enable_free_ads && $member->is_valid_to_post_as_free()) || ($enable_free_ads && $enable_unlimited_free_ads_for_membership)) {
+                $remaining_free_ads = $enable_unlimited_free_ads_for_membership ? __("unlimited", 'classified-listing-store') : $member->get_remaining_ads_as_free();
+                Functions::add_notice(
+                    apply_filters('rtcl_remaining_free_ads_success_text',
+                        sprintf(__('You have %s free ads.', 'classified-listing-store'), $remaining_free_ads),
+                        $remaining_free_ads, $member),
+                    'success'
+                );
+                $allow_free_ads = true;
+            }
+            if ($remaining_ads = $member->is_valid_to_post()) {
+                Functions::add_notice(apply_filters('rtcl_remaining_regular_ads_success_text',
+                    sprintf(__('You have %s regular ads.', 'classified-listing-store'), $remaining_ads),
+                    $remaining_ads, $member), 'success');
+            } else {
+                if (!$allow_free_ads) {
+                    Functions::add_notice(apply_filters('rtcl_remaining_ads_error_text',
+                        sprintf(__('You have no remaining ads at your current membership. <a href="%s">Update your subscription</a>.', 'classified-listing-store'), Link::get_checkout_endpoint_url('membership')),
+                        $member), 'error');
+                }
+            }
+        } elseif ($member && $member->has_membership() == 0) {
             $allow_free_ads = false;
             if (($enable_free_ads && $member->is_valid_to_post_as_free()) || ($enable_free_ads && $enable_unlimited_free_ads_for_membership)) {
                 $remaining_free_ads = $enable_unlimited_free_ads_for_membership ? __("unlimited", 'classified-listing-store') : $member->get_remaining_ads_as_free();
@@ -123,7 +148,7 @@ class MembershipHook
                         $member), 'error');
                 }
             }
-        } else {
+        }else {
             if ($enable_free_ads) {
                 if ($member && $member->is_valid_to_post_as_free()) {
                     $remaining_free_ads = $member->get_remaining_ads_as_free();
