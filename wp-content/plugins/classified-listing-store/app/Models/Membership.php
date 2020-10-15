@@ -424,6 +424,8 @@ class Membership
      * @throws \Exception
      */
     public function add_membership($payment) {
+       
+  
         if (!$this->id) {
             $pricing = $payment->pricing;
             $ads = absint(get_post_meta($pricing->getId(), 'regular_ads', true));
@@ -450,12 +452,22 @@ class Membership
             if ($id = $wpdb->insert_id) {
                 $payment->set_applied();
                 $this->set_membership_data();
-                $cats = get_post_meta($pricing->getId(), 'membership_categories', true);
+
+                $cats = get_post_meta($pricing->getId(), 'membership_categories', true); // alla selected categories from pricing
+                if (is_array($cats) ) {
+                    $cats[] = get_post_meta($payment->get_id(), 'abdoads_categories', true); // client selected category
+                }else{
+                    $cats = array(
+                        get_post_meta($payment->get_id(), 'abdoads_categories', true),
+                    );
+                }
+
                 if (is_array($cats) && !empty($cats)) {
                     foreach ($cats as $cat) {
                         $this->add_meta('membership_categories', $cat);
                     }
                 }
+          
                 $promotions = get_post_meta($payment->get_id(), "_rtcl_membership_promotions", true);
                 if (is_array($promotions) && !empty($promotions)) {
                     $this->update_meta('_rtcl_promotions', $promotions);
@@ -634,3 +646,6 @@ class Membership
     }
 
 }
+
+
+

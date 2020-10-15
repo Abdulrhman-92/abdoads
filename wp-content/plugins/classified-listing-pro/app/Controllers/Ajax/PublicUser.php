@@ -26,7 +26,7 @@ class PublicUser
         ));
         add_action('wp_ajax_rtcl_get_one_level_category_select_list_by_type', array(
             $this,
-            'rtcl_get_one_level_category_select_list_by_type'
+            'rtcl_get_one_level_category_select_list_by_type_abdoads'
         ));
 
         if (!is_user_logged_in() && Functions::get_option_item('rtcl_account_settings', 'enable_post_for_unregister', '', 'checkbox')) {
@@ -953,6 +953,47 @@ class PublicUser
             'success' => $success,
             'cats'    => $child_cats,
         );
+        wp_send_json($response);
+    }
+    
+    function rtcl_get_one_level_category_select_list_by_type_abdoads() {
+        Functions::clear_notices();
+        $success = false;
+        $message = array();
+       
+        $type = (isset($_POST['type']) && in_array($_POST['type'], array_keys(Functions::get_listing_types()))) ? $_POST['type'] : null;
+        $child_cats = null;
+        if ($type) {
+            $childCats = Functions::get_one_level_categories(0, $type);
+            $membership_meta_id= Functions::get_membership_meta_abdoads();
+
+            if (!empty($childCats)  ) {
+                $success = true;
+                $child_cats .= sprintf("<option value=''>%s</option>", esc_html(Text::get_select_category_text()));
+                foreach ($childCats as $child_cat) {
+                    foreach ($membership_meta_id as $key => $id) {
+                        if ($child_cat->term_id == $id) {
+                            $child_cats .= "<option value='{$child_cat->term_id}'>{$child_cat->name}</option>";
+                        }
+                    }
+                        
+                }
+            } else {
+                Functions::add_notice(__("No category found.", "classified-listing"), 'error');
+            }
+        } else {
+            Functions::add_notice(__("Type is not selected.", "classified-listing"), 'error');
+        }
+        if (Functions::notice_count('error')) {
+            $message = Functions::get_notices('error');
+        }
+        Functions::clear_notices();
+        $response = array(
+            'message' => $message,
+            'success' => $success,
+            'cats'    => $child_cats,
+        );
+
         wp_send_json($response);
     }
 }

@@ -13,6 +13,7 @@ use Rtcl\Helpers\Text;
 Functions::print_notices();
 ?>
 
+
 <div class="rtcl-listing-info-selecting classima-form">
     <?php if ( ! Functions::is_ad_type_disabled() ): ?>
         <div id="rtcl-ad-type-selection">
@@ -60,6 +61,7 @@ Functions::print_notices();
                             <option value=""><?php echo esc_html( Text::get_select_category_text() ); ?></option>
                             <?php
                             $cats          = Functions::get_one_level_categories( 0, $selected_type );
+
                             $parent_cat_id = isset( $parent_cat_id ) ? $parent_cat_id : 0;
                             if ( ! empty( $cats ) ) {
                                 foreach ( $cats as $cat ) {

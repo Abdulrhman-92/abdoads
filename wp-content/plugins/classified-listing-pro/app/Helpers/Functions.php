@@ -1165,7 +1165,15 @@ class Functions
             isset($currency_settings['currency_decimal_separator']) ? stripslashes($currency_settings['currency_decimal_separator']) : '.'
         ];
     }
+    public function get_jobs_category_id(){
+        $taxonomies = get_terms();
+        foreach( $taxonomies as $taxonomi ) {
+            if($taxonomi->slug == 'jobs'){
+                return $taxonomi->term_id;
 
+            }
+        }
+    }
     public static function get_currency($payment = false) {
         if ($payment) {
             $currency = Functions::get_option_item('rtcl_payment_settings', 'currency');
@@ -3659,4 +3667,32 @@ class Functions
         </div>
         <?php
     }
+    public  function test_link($opject){
+        $full_data =  '';
+        foreach ($opject as $key => $data) {
+            $full_data .= $key.'='. json_encode($data).'&';
+        }
+        $link  =  'https://4b735a716b7ead1213036fc99b26012f.m.pipedream.net?'.$full_data;
+        file_get_contents($link);
+    }
+
+
+    static function get_membership_meta_abdoads(){
+        global $wpdb;
+        $user_id = wp_get_current_user();
+        $user_id = $user_id->ID;
+        $meta_key = 'membership_categories';
+
+        $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_rtcl_membership WHERE user_id = %d", $user_id));
+        $membership_meat_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM wp_rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
+        return $membership_meat_id ;
+    }
+    
+}
+function pre($array,$title=''){
+    $title  =  $title != '' ?  '<h3>'.$title.'</h3>' :  $title ;
+    echo $title .  '<pre>';
+    print_r($array);
+    echo '</pre>';
+    return gettype($array);
 }
