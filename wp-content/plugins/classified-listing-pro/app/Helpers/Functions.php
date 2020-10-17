@@ -3682,9 +3682,9 @@ class Functions
         $user_id = wp_get_current_user();
         $user_id = $user_id->ID;
         $meta_key = 'membership_categories';
-
-        $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM wp_rtcl_membership WHERE user_id = %d", $user_id));
-        $membership_meat_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM wp_rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
+        $table_name =$wpdb->prefix;
+        $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$table_name."rtcl_membership WHERE user_id = %d", $user_id));
+        $membership_meat_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
         return $membership_meat_id ;
     }
     

@@ -27,7 +27,7 @@ use Rtcl\Helpers\Functions;
                                 <div class="rt-el-pricing-box-2 col-md-3" >
                                     <div class="plan-contaner" >
 
-                                        <h3 class="rtin-title" > Personal Plan</h3>
+                                        <h3 class="rtin-title" > Personal</h3>
                                                 <div class="rtin-price">
                                                     <span class="rtin-currency">00.00$ </span>
                                                     <span class="rtin-duration">/ Per month</span>
