@@ -3684,7 +3684,7 @@ class Functions
         $meta_key = 'membership_categories';
         $table_name =$wpdb->prefix;
         $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$table_name."rtcl_membership WHERE user_id = %d", $user_id));
-        $membership_meat_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
+        $membership_meat_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM ".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
         return $membership_meat_id ;
     }
     
