@@ -955,7 +955,6 @@ class PublicUser
         );
         wp_send_json($response);
     }
-    
     function rtcl_get_one_level_category_select_list_by_type_abdoads() {
         Functions::clear_notices();
         $success = false;
@@ -967,18 +966,25 @@ class PublicUser
             $childCats = Functions::get_one_level_categories(0, $type);
             $membership_meta_id= Functions::get_membership_meta_abdoads();
 
-            if (!empty($childCats)  ) {
+            if (!empty($childCats) && $membership_meta_id !== false ) {
                 $success = true;
                 $child_cats .= sprintf("<option value=''>%s</option>", esc_html(Text::get_select_category_text()));
                 foreach ($childCats as $child_cat) {
                     foreach ($membership_meta_id as $key => $id) {
                         if ($child_cat->term_id == $id) {
                             $child_cats .= "<option value='{$child_cat->term_id}'>{$child_cat->name}</option>";
-                        }
+                       }
                     }
                         
                 }
-            } else {
+            } elseif(!empty($childCats) && $membership_meta_id == false ){
+                $success = true;
+                $child_cats .= sprintf("<option value=''>%s</option>", esc_html(Text::get_select_category_text()));
+                foreach ($childCats as $child_cat) {
+                    $child_cats .= "<option value='{$child_cat->term_id}'>{$child_cat->name}</option>";
+
+                }
+            }else {
                 Functions::add_notice(__("No category found.", "classified-listing"), 'error');
             }
         } else {
@@ -994,6 +1000,6 @@ class PublicUser
             'cats'    => $child_cats,
         );
 
-        wp_send_json($response);
+        wp_send_json($response );
     }
 }
