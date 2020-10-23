@@ -472,6 +472,12 @@ class Membership
                 if (is_array($promotions) && !empty($promotions)) {
                     $this->update_meta('_rtcl_promotions', $promotions);
                 }
+                
+                $imags_number = get_post_meta($payment->get_id(), "abdoads_images_number", true);
+                if (!empty($imags_number)) {
+                    $this->add_meta('abdoads_images_number', $imags_number);
+                }
+
             }
         }
     }

@@ -3676,13 +3676,31 @@ class Functions
         file_get_contents($link);
     }
 
-
+//////////////////////
     static function get_membership_meta_abdoads(){
         global $wpdb;
         $user_id = wp_get_current_user();
         $user_id = $user_id->ID;
         $meta_key = 'membership_categories';
         $table_name =$wpdb->prefix;
+        $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$table_name."rtcl_membership WHERE user_id = %d", $user_id));
+
+        if( $membership !== null) {
+            $membership_meat_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM ".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
+            return $membership_meat_id ;
+
+        }else{
+            return false ;
+        }
+    }
+
+    static function get_membership_images_number_abdoads(){
+        global $wpdb;
+        $user_id = wp_get_current_user();
+        $user_id = $user_id->ID;
+        $meta_key = 'abdoads_images_number';
+        $table_name =$wpdb->prefix;
+        
         $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$table_name."rtcl_membership WHERE user_id = %d", $user_id));
 
         if( $membership !== null) {

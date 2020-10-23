@@ -31,13 +31,16 @@ class Gallery
             "button_class"  => "button-secondary",
             "post_id_input" => "#post_ID"
         ), $conf);
-        $args = array(
-            'post_type' => 'rtcl_pricing',
-            'post_status' => 'publish',
+      
+        $image_membership =  Functions::get_membership_images_number_abdoads();
+        if (!empty($image_membership)) {
+                foreach ($image_membership as $key => $number_images) {
+                    $max_image_limit = $number_images;
+                }
+        }else {
+            $max_image_limit = Functions::get_option_item('rtcl_moderation_settings', 'maximum_images_per_listing', 5);
+        }
         
-        );
-        $postslist = get_posts( $args );
-        $max_image_limit = Functions::get_option_item('rtcl_moderation_settings', 'maximum_images_per_listing', 5);
         $max_image_size = Functions::get_max_upload();
         $init = [
             'runtimes'            => 'html5,silverlight,flash,html4',
@@ -78,7 +81,6 @@ class Gallery
             <div id="rtcl-gallery-upload-ui-wrapper"
                  class="<?php echo is_admin() ? "rtcl-browser-admin" : "rtcl-browser-frontend" ?>">
                 <div id="rtcl-gallery-drag-drop-area" class="rtcl-drag-drop-area"></div>
-               <?php echo '<pre>'; print_r($postslist );echo '</pre>';?>
                 <div class="rtcl-gallery">
                     <p><?php _e("Drop files here to add them.", "classified-listing") ?></p>
                     <p><a href="#" id="rtcl-gallery-browse-button"

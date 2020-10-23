@@ -47,6 +47,10 @@ class MembershipHook
             }
         }
         $new_payment_args['meta_input']['abdoads_categories'] =  $_POST['select-cat'];
+       
+        $images_number = get_field( "number_of_images", $pricing->getId());
+        $new_payment_args['meta_input']['abdoads_images_number'] =  $images_number;
+
         return $new_payment_args;
     }
 
