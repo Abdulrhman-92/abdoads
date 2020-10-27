@@ -453,7 +453,9 @@ class Membership
                 $payment->set_applied();
                 $this->set_membership_data();
 
+                
                 $cats = get_post_meta($pricing->getId(), 'membership_categories', true); // alla selected categories from pricing
+                
                 if (is_array($cats) ) {
                     $cats[] = get_post_meta($payment->get_id(), 'abdoads_categories', true); // client selected category
                 }else{

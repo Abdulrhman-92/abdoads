@@ -970,6 +970,7 @@ class PublicUser
                 $success = true;
                 $child_cats .= sprintf("<option value=''>%s</option>", esc_html(Text::get_select_category_text()));
                 foreach ($childCats as $child_cat) {
+                    
                     foreach ($membership_meta_id as $key => $id) {
                         if ($child_cat->term_id == $id) {
                             $child_cats .= "<option value='{$child_cat->term_id}'>{$child_cat->name}</option>";

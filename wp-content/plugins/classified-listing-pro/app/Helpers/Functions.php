@@ -3684,10 +3684,16 @@ class Functions
         $meta_key = 'membership_categories';
         $table_name =$wpdb->prefix;
         $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$table_name."rtcl_membership WHERE user_id = %d", $user_id));
-
         if( $membership !== null) {
-            $membership_meat_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM ".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
-            return $membership_meat_id ;
+            $membership_meta_ids = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM ".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
+           
+            $membership_meta_all_ids = array();
+          
+           foreach ($membership_meta_ids as $key => $id){
+                $membership_meta_all_ids [] = icl_object_id( $id, 'rtcl_category', true, ICL_LANGUAGE_CODE );
+            }
+           
+            return $membership_meta_all_ids ;
 
         }else{
             return false ;
@@ -3704,8 +3710,8 @@ class Functions
         $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$table_name."rtcl_membership WHERE user_id = %d", $user_id));
 
         if( $membership !== null) {
-            $membership_meat_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM ".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
-            return $membership_meat_id ;
+            $membership_meta_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM ".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
+            return $membership_meta_id ;
 
         }else{
             return false ;

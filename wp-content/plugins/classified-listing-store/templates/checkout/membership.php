@@ -204,8 +204,10 @@ use Rtcl\Helpers\Functions;
                     <option value=""><?php echo esc_attr_e( 'Select ', 'abdoads' ); ?></option>
                     <?php 
                         
-                        $taxonomies = get_terms( 'rtcl_category', array(
-                            'parent'    => 0,
+                        $taxonomies = get_terms( array( 
+                            'taxonomy' => 'rtcl_category',
+                            'parent'   => 0,
+                            "hide_empty" => 0
                         ) );
                         $get_job_id = Functions:: get_jobs_category_id();
                         foreach( $taxonomies as $taxonomi ) {
@@ -223,6 +225,8 @@ use Rtcl\Helpers\Functions;
         </tr>
     </table>
 </div>
+<?php print_r ($taxonomies);?>
+
 
 <style>
     .plan-contaner{background-color: #f0f8ff;width:100%; margin-bottom:20px;height: 600px;}
