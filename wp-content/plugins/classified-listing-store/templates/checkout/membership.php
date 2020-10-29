@@ -225,7 +225,6 @@ use Rtcl\Helpers\Functions;
         </tr>
     </table>
 </div>
-<?php print_r ($taxonomies);?>
 
 
 <style>
