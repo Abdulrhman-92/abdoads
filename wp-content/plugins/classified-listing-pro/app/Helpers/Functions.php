@@ -761,9 +761,17 @@ class Functions
      * @return string
      */
     static function get_sub_terms_filter_html($args, $terms = []) {
-        $current_term = !empty($args['instance']['current_taxonomy'][$args['taxonomy']]) ? (object)$args['instance']['current_taxonomy'][$args['taxonomy']] : '';
-        $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $args['parent']) : $terms;
-        $html = '';
+
+        if ($args['parent'] == 0) {
+            $current_term = !empty($args['instance']['current_taxonomy'][$args['taxonomy']]) ? (object)$args['instance']['current_taxonomy'][$args['taxonomy']] : '';
+            $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $args['parent']) : $terms;
+
+        }else{
+           $current_term = !empty($args['parent']) ? $args['parent'] : '';
+           $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $current_term) : $terms;
+
+        }
+   
 
         if (!empty($terms)) {
             $ulCls = $args['parent'] ? 'sub-list' : 'filter-list';
@@ -780,83 +788,255 @@ class Functions
                     $allTaxonomyLink = get_term_link((object)$args['instance']['current_taxonomy'][rtcl()->category]);
                 }
                 $allTaxonomyLinkHtml = sprintf(
-                    '<li class="all-taxonomy"><a href="%s">%s</a></li>',
+
+                    '<li class="all-taxonomy"><a href="%s">%s</a> </li>',
                     $allTaxonomyLink,
                     apply_filters('rtcl_widget_filter_taxonomy_reset_text', $allTaxonomyLink_text, $args['taxonomy'])
                 );
             }
-            foreach ($terms as $term) {
-                $count = Functions::get_listings_count_by_taxonomy($term->term_id, $args['taxonomy'], true);
-                if (!empty($args['instance']['hide_empty']) && 0 === $count) {
-                    continue;
-                }
-                $children = Functions::get_sub_terms($args['taxonomy'], $term->term_id);
-                $args['parent'] = $term->term_id;
-                $cls = $has_arrow = $sub_term_html = $cls_open = null;
-                if (!empty($children)) {
-                    $cls = "is-parent has-sub";
-                    $has_arrow = "<span class='arrow'><i class='rtcl-icon rtcl-icon-down-open'> </i></span>";
-                    $cls_open = null;
-                    if (isset($current_term->taxonomy) && $args['taxonomy'] === $current_term->taxonomy) {
-                        if ($term->term_id === absint($current_term->term_id)) {
-                            $cls_open = " is-open";
-                        } else {
-                            $ids = get_ancestors($current_term->term_id, $args['taxonomy']);
-                            if (!empty($ids) && in_array($term->term_id, $ids)) {
+       
+            if (!empty($current_term)&&$args['parent'] == 0) {
+                $current_term_id= $current_term->term_id;
+                $terms =  Functions::get_sub_terms($args['taxonomy'], $current_term_id) ;
+
+                foreach ($terms as $term) {
+                    
+
+                    $count = Functions::get_listings_count_by_taxonomy($term->term_id, $args['taxonomy'], true);
+                    if (!empty($args['instance']['hide_empty']) && 0 === $count) {
+                        continue;
+                    }
+    
+                    $children = Functions::get_sub_terms($args['taxonomy'], $term->term_id);                
+                    $args['parent'] = $term->term_id;
+                    $cls = $has_arrow = $sub_term_html = $cls_open = null;
+                    if (!empty($children)) {
+                        $cls = "is-parent has-sub";
+                        $has_arrow = "<span class='arrow'><i class='rtcl-icon rtcl-icon-down-open'> </i></span>";
+                        $cls_open = null;
+                        if (isset($current_term->taxonomy) && $args['taxonomy'] === $current_term->taxonomy) {
+                            if ($term->term_id === absint($current_term->term_id)) {
+
                                 $cls_open = " is-open";
+                            } else {
+
+                                $ids = get_ancestors($current_term->term_id, $args['taxonomy']);
+                                if (!empty($ids) && in_array($term->term_id, $ids)) {
+                                    $cls_open = " is-open";
+                                }
                             }
                         }
+                        $cls = $cls . $cls_open;
                     }
-                    $cls = $cls . $cls_open;
-                }
-                $cat_img_icon = null;
-                if ($args['taxonomy'] == rtcl()->category && $term->parent == 0) {
-                    $cat_img = $cat_icon = null;
-                    if (!empty($args['instance']['show_icon_image_for_category'])) {
-                        $image_id = get_term_meta($term->term_id, '_rtcl_image', true);
-                        if ($image_id) {
-                            $image_attributes = wp_get_attachment_image_src((int)$image_id, 'medium');
-                            $image = $image_attributes[0];
-                            if ('' !== $image) {
-                                $cat_img = sprintf('<img src="%s" alt="%s" class="rtcl-cat-img" />', esc_url($image), esc_attr($term->name));
+                    $cat_img_icon = null;
+                    if ($args['taxonomy'] == rtcl()->category && $term->parent == 0) {
+                        $cat_img = $cat_icon = null;
+                        if (!empty($args['instance']['show_icon_image_for_category'])) {
+                            $image_id = get_term_meta($term->term_id, '_rtcl_image', true);
+                            if ($image_id) {
+                                $image_attributes = wp_get_attachment_image_src((int)$image_id, 'medium');
+                                $image = $image_attributes[0];
+                                if ('' !== $image) {
+                                    $cat_img = sprintf('<img src="%s" alt="%s" class="rtcl-cat-img" />', esc_url($image), esc_attr($term->name));
+                                }
+                            }
+                            $icon_id = get_term_meta($term->term_id, '_rtcl_icon', true);
+                            if ($icon_id) {
+                                $cat_icon = sprintf('<span class="rtcl-cat-icon rtcl-icon rtcl-icon-%s"></span>', $icon_id);
                             }
                         }
-                        $icon_id = get_term_meta($term->term_id, '_rtcl_icon', true);
-                        if ($icon_id) {
-                            $cat_icon = sprintf('<span class="rtcl-cat-icon rtcl-icon rtcl-icon-%s"></span>', $icon_id);
-                        }
+                        $cat_img_icon = $cat_img ? $cat_img : $cat_icon;
                     }
-                    $cat_img_icon = $cat_img ? $cat_img : $cat_icon;
-                }
-                $term_link = get_term_link($term);
-                if ("rtcl_category" === $term->taxonomy && !empty($args['instance']['current_taxonomy']['rtcl_location'])) {
-                    $obj = (object)$args['instance']['current_taxonomy']['rtcl_location'];
-                    $term_link = add_query_arg([
-                        'rtcl_location' => $obj->slug
-                    ], $term_link);
-                } elseif ("rtcl_location" === $term->taxonomy && !empty($args['instance']['current_taxonomy']['rtcl_category'])) {
-                    $obj = (object)$args['instance']['current_taxonomy']['rtcl_category'];
-                    $term_link = add_query_arg([
-                        'rtcl_category' => $obj->slug
-                    ], $term_link);
+                    $term_link = get_term_link($term);
+                    if ("rtcl_category" === $term->taxonomy && !empty($args['instance']['current_taxonomy']['rtcl_location'])) {
+                        $obj = (object)$args['instance']['current_taxonomy']['rtcl_location'];
+                        $term_link = add_query_arg([
+                            'rtcl_location' => $obj->slug
+                        ], $term_link);
+                    } elseif ("rtcl_location" === $term->taxonomy && !empty($args['instance']['current_taxonomy']['rtcl_category'])) {
+                        $obj = (object)$args['instance']['current_taxonomy']['rtcl_category'];
+                        $term_link = add_query_arg([
+                            'rtcl_category' => $obj->slug
+                        ], $term_link);
+                    }
+    
+                    if($current_term && $current_term->term_id == $term->term_id){
+                        $cls .= " active";
+                    }
+                    $html .= sprintf("<li class='%s'%s>%s%s%s</li>",
+                        $cls,
+                        $has_arrow ? sprintf(' data-id="%d"', $term->term_id) : '',
+                        sprintf('<a href="%s">%s%s%s</a>',
+                            $term_link,
+                            $cat_img_icon,
+                            $term->name,
+                            !empty($args['instance']['show_count']) ? ' (' . $count . ')' : ''
+                        ),
+                        $has_arrow,
+                        !empty($args['instance']['ajax_load']) ? $cls_open ? self::get_sub_terms_filter_html($args, $children) : '' : self::get_sub_terms_filter_html($args, $children)
+                    );
+
                 }
 
-                if($current_term && $current_term->term_id == $term->term_id){
-                    $cls .= " active";
+            }elseif (!empty($current_term)&& $args['parent'] > 0) {
+                $current_term_id= $current_term;
+                $terms =  Functions::get_sub_terms($args['taxonomy'], $current_term_id) ;
+
+                foreach ($terms as $term) {
+                    
+
+                    $count = Functions::get_listings_count_by_taxonomy($term->term_id, $args['taxonomy'], true);
+                    if (!empty($args['instance']['hide_empty']) && 0 === $count) {
+                        continue;
+                    }
+    
+                    $children = Functions::get_sub_terms($args['taxonomy'], $term->term_id);
+                    $args['parent'] = $term->term_id;
+                    $cls = $has_arrow = $sub_term_html = $cls_open = null;
+                    if (!empty($children)) {
+                        $cls = "is-parent has-sub";
+                        $has_arrow = "<span class='arrow'><i class='rtcl-icon rtcl-icon-down-open'> </i></span>";
+                        $cls_open = null;
+                        if (isset($current_term->taxonomy) && $args['taxonomy'] === $current_term->taxonomy) {
+                            if ($term->term_id === absint($current_term->term_id)) {
+
+                                $cls_open = " is-open";
+                            } else {
+
+                                $ids = get_ancestors($current_term->term_id, $args['taxonomy']);
+                                if (!empty($ids) && in_array($term->term_id, $ids)) {
+                                    $cls_open = " is-open";
+                                }
+                            }
+                        }
+                        $cls = $cls . $cls_open;
+                    }
+                    $cat_img_icon = null;
+                    if ($args['taxonomy'] == rtcl()->category && $term->parent == 0) {
+                        $cat_img = $cat_icon = null;
+                        if (!empty($args['instance']['show_icon_image_for_category'])) {
+                            $image_id = get_term_meta($term->term_id, '_rtcl_image', true);
+                            if ($image_id) {
+                                $image_attributes = wp_get_attachment_image_src((int)$image_id, 'medium');
+                                $image = $image_attributes[0];
+                                if ('' !== $image) {
+                                    $cat_img = sprintf('<img src="%s" alt="%s" class="rtcl-cat-img" />', esc_url($image), esc_attr($term->name));
+                                }
+                            }
+                            $icon_id = get_term_meta($term->term_id, '_rtcl_icon', true);
+                            if ($icon_id) {
+                                $cat_icon = sprintf('<span class="rtcl-cat-icon rtcl-icon rtcl-icon-%s"></span>', $icon_id);
+                            }
+                        }
+                        $cat_img_icon = $cat_img ? $cat_img : $cat_icon;
+                    }
+                    $term_link = get_term_link($term);
+                    if ("rtcl_category" === $term->taxonomy && !empty($args['instance']['current_taxonomy']['rtcl_location'])) {
+                        $obj = (object)$args['instance']['current_taxonomy']['rtcl_location'];
+                        $term_link = add_query_arg([
+                            'rtcl_location' => $obj->slug
+                        ], $term_link);
+                    } elseif ("rtcl_location" === $term->taxonomy && !empty($args['instance']['current_taxonomy']['rtcl_category'])) {
+                        $obj = (object)$args['instance']['current_taxonomy']['rtcl_category'];
+                        $term_link = add_query_arg([
+                            'rtcl_category' => $obj->slug
+                        ], $term_link);
+                    }
+    
+                    if($current_term && $current_term->term_id == $term->term_id){
+                        $cls .= " active";
+                    }
+                    $html .= sprintf("<li class='%s'%s>%s%s%s</li>",
+                        $cls,
+                        $has_arrow ? sprintf(' data-id="%d"', $term->term_id) : '',
+                        sprintf('<a href="%s">%s%s%s</a>',
+                            $term_link,
+                            $cat_img_icon,
+                            $term->name,
+                            !empty($args['instance']['show_count']) ? ' (' . $count . ')' : ''
+                        ),
+                        $has_arrow,
+                        !empty($args['instance']['ajax_load']) ? $cls_open ? self::get_sub_terms_filter_html($args, $children) : '' : self::get_sub_terms_filter_html($args, $children)
+                    );
+
                 }
-                $html .= sprintf("<li class='%s'%s>%s%s%s</li>",
-                    $cls,
-                    $has_arrow ? sprintf(' data-id="%d"', $term->term_id) : '',
-                    sprintf('<a href="%s">%s%s%s</a>',
-                        $term_link,
-                        $cat_img_icon,
-                        $term->name,
-                        !empty($args['instance']['show_count']) ? ' (' . $count . ')' : ''
-                    ),
-                    $has_arrow,
-                    !empty($args['instance']['ajax_load']) ? $cls_open ? self::get_sub_terms_filter_html($args, $children) : '' : self::get_sub_terms_filter_html($args, $children)
-                );
+
+            }else{
+                foreach ($terms as $term) {
+                    $count = Functions::get_listings_count_by_taxonomy($term->term_id, $args['taxonomy'], true);
+                    if (!empty($args['instance']['hide_empty']) && 0 === $count) {
+                        continue;
+                    }
+    
+                    $children = Functions::get_sub_terms($args['taxonomy'], $term->term_id);
+                    $args['parent'] = $term->term_id;
+                    $cls = $has_arrow = $sub_term_html = $cls_open = null;
+                    if (!empty($children)) {
+                        $cls = "is-parent has-sub";
+                        $has_arrow = "<span class='arrow'><i class='rtcl-icon rtcl-icon-down-open'> </i></span>";
+                        $cls_open = null;
+                        if (isset($current_term->taxonomy) && $args['taxonomy'] === $current_term->taxonomy) {
+                            if ($term->term_id === absint($current_term->term_id)) {
+                                $cls_open = " is-open";
+                            } else {
+                                $ids = get_ancestors($current_term->term_id, $args['taxonomy']);
+                                if (!empty($ids) && in_array($term->term_id, $ids)) {
+                                    $cls_open = " is-open";
+                                }
+                            }
+                        }
+                        $cls = $cls . $cls_open;
+                    }
+                    $cat_img_icon = null;
+                    if ($args['taxonomy'] == rtcl()->category && $term->parent == 0) {
+                        $cat_img = $cat_icon = null;
+                        if (!empty($args['instance']['show_icon_image_for_category'])) {
+                            $image_id = get_term_meta($term->term_id, '_rtcl_image', true);
+                            if ($image_id) {
+                                $image_attributes = wp_get_attachment_image_src((int)$image_id, 'medium');
+                                $image = $image_attributes[0];
+                                if ('' !== $image) {
+                                    $cat_img = sprintf('<img src="%s" alt="%s" class="rtcl-cat-img" />', esc_url($image), esc_attr($term->name));
+                                }
+                            }
+                            $icon_id = get_term_meta($term->term_id, '_rtcl_icon', true);
+                            if ($icon_id) {
+                                $cat_icon = sprintf('<span class="rtcl-cat-icon rtcl-icon rtcl-icon-%s"></span>', $icon_id);
+                            }
+                        }
+                        $cat_img_icon = $cat_img ? $cat_img : $cat_icon;
+                    }
+                    $term_link = get_term_link($term);
+                    if ("rtcl_category" === $term->taxonomy && !empty($args['instance']['current_taxonomy']['rtcl_location'])) {
+                        $obj = (object)$args['instance']['current_taxonomy']['rtcl_location'];
+                        $term_link = add_query_arg([
+                            'rtcl_location' => $obj->slug
+                        ], $term_link);
+                    } elseif ("rtcl_location" === $term->taxonomy && !empty($args['instance']['current_taxonomy']['rtcl_category'])) {
+                        $obj = (object)$args['instance']['current_taxonomy']['rtcl_category'];
+                        $term_link = add_query_arg([
+                            'rtcl_category' => $obj->slug
+                        ], $term_link);
+                    }
+    
+                    if($current_term && $current_term->term_id == $term->term_id){
+                        $cls .= " active";
+                    }
+                    $html .= sprintf("<li class='%s'%s>%s%s%s</li>",
+                        $cls,
+                        $has_arrow ? sprintf(' data-id="%d"', $term->term_id) : '',
+                        sprintf('<a href="%s">%s%s%s</a>',
+                            $term_link,
+                            $cat_img_icon,
+                            $term->name,
+                            !empty($args['instance']['show_count']) ? ' (' . $count . ')' : ''
+                        ),
+                        $has_arrow,
+                        !empty($args['instance']['ajax_load']) ? $cls_open ? self::get_sub_terms_filter_html($args, $children) : '' : self::get_sub_terms_filter_html($args, $children)
+                    );
+                }
             }
+            
             if ($html && rtcl()->location === $args['taxonomy']) {
                 $html .= '<li class="is-opener"><span class="rtcl-more"><i class="rtcl-icon rtcl-icon-plus-circled"></i><span class="text">' . __("Show More",
                         "classified-listing") . '</span></span></li>';
