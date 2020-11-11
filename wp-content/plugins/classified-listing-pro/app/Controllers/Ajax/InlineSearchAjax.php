@@ -86,15 +86,46 @@ class InlineSearchAjax
 
 
     static function rtcl_ajax_taxonomy_filter_get_sub_level_html() {
-        $args = wp_parse_args(
-            $_REQUEST,
-            [
-                'taxonomy' => rtcl()->category,
-                'parent'   => -1,
-                'instance' => []
-            ]
-        );
-        wp_send_json_success(Functions::get_sub_terms_filter_html($args));
+        //print_r($_REQUEST);
+        
+        $slug           =   $_REQUEST["slug"];
+        $cat            =   $_REQUEST["taxonomy"];
+        $exploade_tax   =   explode("_",$cat);
+        $tax_type       =   $exploade_tax[1] ;
+        $get_term       =   get_term_by('slug',$slug,"$cat");
+        $get_term_id    =   $get_term->term_id   ;
+        $term_id        =   isset($get_term_id) ? $get_term_id : -1 ;
+        $level          =   $_REQUEST["level"];
+       if (!empty($slug)) {
+            $args = array(
+                'taxonomy' =>$cat,
+                'parent'   => $term_id,
+                'hide_empty' => false,
+                'level' => $level 
+            );
+        }else{
+            $args = wp_parse_args(
+                $_REQUEST,
+                [
+                    'taxonomy' =>$cat,
+                    'parent'   => $term_id,
+                    'hide_empty' => false,
+                    'level' => $level ,                    
+                    'instance' => []
+                ]
+            );
+        }
+        $terms= get_terms($args);
+        
+
+        if(!empty($terms)){
+
+            wp_send_json_success( Functions::get_sub_terms_filter_html($args));
+
+        }else{
+            wp_send_json_success("<p id='rtcl_cat_$cat' tax='rtcl_category' level ='$level'>
+            This is the last ".$tax_type."</p>");
+        }
     }
 
     public static function rtcl_inline_search_autocomplete() {

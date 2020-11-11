@@ -928,8 +928,8 @@ class TemplateHooks
         $current_category = !empty($args['current_taxonomy'][rtcl()->category]) ? $args['current_taxonomy'][rtcl()->category]->slug : '';
         $current_location = !empty($args['current_taxonomy'][rtcl()->location]) ? $args['current_taxonomy'][rtcl()->location]->slug : '';
         ?>
-        <input type="hidden" name="rtcl_category" value="<?php echo esc_attr($current_category) ?>">
-        <input type="hidden" name="rtcl_location" value="<?php echo esc_attr($current_location) ?>">
+        <input type="hidden" id="rtcl_category" name="rtcl_category" value="<?php echo esc_attr($current_category) ?>">
+        <input type="hidden" id="rtcl_location" name="rtcl_location" value="<?php echo esc_attr($current_location) ?>">
         <?php
     }
 }

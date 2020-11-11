@@ -1,5 +1,4 @@
 <?php
-
 namespace Rtcl\Helpers;
 
 use Automattic\Jetpack\Constants;
@@ -760,7 +759,7 @@ class Functions
      *
      * @return string
      */
-    static function get_sub_terms_filter_html($args, $terms = []) {
+    static function get_sub_terms_filter_html_original($args, $terms = []) {
 
         if ($args['parent'] == 0) {
             $current_term = !empty($args['instance']['current_taxonomy'][$args['taxonomy']]) ? (object)$args['instance']['current_taxonomy'][$args['taxonomy']] : '';
@@ -1047,7 +1046,259 @@ class Functions
 
         return $html;
     }
+    static function get_sub_terms_filter_html($args, $terms = []) {
+        //pre($args);
+        $html = '';
+       // if ($args['parent'] == 0 && empty($args['instance']['current_taxonomy']['rtcl_location'])&& empty($args['instance']['current_taxonomy']['rtcl_category'])) {
+            $current_term = !empty($args['instance']['current_taxonomy'][$args['taxonomy']]) ? (object)$args['instance']['current_taxonomy'][$args['taxonomy']] : '';
+            //if( gettype($current_term) === 'object'){
+                $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $args['parent']) : $terms;
+                $level = !empty($args['level']) ? $args['level'] + 1  : 1 ;
+               // pre($category);
+               
+               
+                $html = '
+                    <input type="hidden" id="current_term"  value="'.$args['parent'].'">
 
+                ';
+
+                if($args['taxonomy'] == "rtcl_category"){
+
+                    $html .= '
+                        <select id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_category" level ="'.$level.'">
+                    ';
+                
+                }elseif($args['taxonomy'] == "rtcl_location"){
+                   
+                    $html .= '
+                        <select id="rtcl_location_'.$level.'" onchange="append_child(this)" tax = "rtcl_location">
+                    ';
+                }
+                
+                   
+
+            
+                foreach ($terms as $term) {
+                    // pre($term);
+                    
+                    $html .='
+                        <option  value="'. $term->slug.'" class="dropdown-item dropdown-submenu p-0" >
+                            '.$term->name.' 
+                            </option>
+                        </option>
+
+                    ';
+
+                }
+                $html .='  
+                        </select>                    
+                ';
+               
+                $html .= '
+                <script>
+                    function append_child(element){
+                        
+                        var id                  =   element.id; 
+                        var slug_value          =   document.getElementById(id).value;
+                        var level               =   document.getElementById(id).getAttribute("level");
+                        var taxonomy            =   document.getElementById(id).getAttribute("tax"); 
+                        var current_term_id     =   document.getElementById("current_term").value;
+                        var elements_cat        =   jQuery("[tax^='."'".'rtcl_category'."'".']"); 
+                        var elements_loc        =   jQuery("[tax^='."'".'rtcl_location'."'".']");
+
+
+                        jQuery.ajax({
+                            url: "http://localhost/abdoads/wp-admin/admin-ajax.php",
+                            type: "POST",
+        
+                            data: {
+                                action: "rtcl_ajax_taxonomy_filter_get_sub_level_html",
+                                slug: slug_value,
+                                current:current_term_id,
+                                level : level,
+                                taxonomy : taxonomy
+                            },
+                            success: function(result){
+
+                                if(taxonomy == "rtcl_category"){
+                                    var i;
+
+                                    for (i = 0 ; i < elements_cat.length ; i++) {
+                                        //alert( result.data);
+                                        var item        =  elements_cat[i];
+                                        var item_level  = item.getAttribute("level");
+                                        if (level < item_level) {var visibility = 0 ;
+                                            item.style.display = "none";
+                                        }else{var visibility = 1 ;}
+                                    }
+
+                                    if (visibility == 0){
+                                        const Parent        = document.getElementById(id);
+                                        const chiled        = document.createElement("div");
+                                        chiled.innerHTML    = result.data;
+                                        Parent.after(chiled);
+                                    }else{
+                                        const Parent        = document.getElementById(id);
+                                        const chiled        = document.createElement("div");
+                                        chiled.innerHTML    = result.data;
+                                        Parent.after(chiled);   
+                                    }
+
+
+                                } else if(taxonomy == "rtcl_location"){
+                                    var i;
+
+                                    for (i = 0 ; i < elements_loc.length ; i++) {
+                                        var item        =  elements_loc[i];
+                                        var item_level  = item.getAttribute("level");
+                                        if (level < item_level) {var visibility = 0 ;}else{var visibility = 1 ;}
+                                    }
+
+                                    if (visibility == 0){
+                                        item.style.visibility = "hidden";
+                                        const Parent        = document.getElementById(id);
+                                        const chiled        = document.createElement("div");
+                                        chiled.innerHTML    = result.data;
+                                        Parent.after(chiled);
+                                    }else{
+                                        const Parent        = document.getElementById(id);
+                                        const chiled        = document.createElement("div");
+                                        chiled.innerHTML    = result.data;
+                                        Parent.after(chiled);   
+                                    }
+
+                                }
+                                
+                            }
+                        });
+                    }
+
+                </script>
+                ';
+
+           // }
+               
+
+      /*  }else*/if ($args['parent'] == 0 && !empty($args['instance']['current_taxonomy']['rtcl_location']) || !empty($args['instance']['current_taxonomy']['rtcl_category'])){
+
+            $current_term = !empty($args['instance']['current_taxonomy'][$args['taxonomy']]) ? (object)$args['instance']['current_taxonomy'][$args['taxonomy']] : '';
+           // if( gettype($current_term) === 'object'){
+               
+                $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'] , $current_term->term_id) : $terms;
+                $html = '
+                <form id="filter_abdoads">
+                    <input type="hidden" id="category_abdoads"  value="0">
+                    <input type="hidden" id="location_abdoads" value="0">
+
+                    <label>'. $current_term->name.' </label>
+                ';
+
+                if($args['taxonomy'] == "rtcl_category"){
+
+                    $html .= '<select id="filter_cat"  onchange="set_cat_id()" >';
+                
+                }elseif($args['taxonomy'] == "rtcl_location"){
+                   
+                    $html .= '<select id="filter_location"  onchange="set_location_id()" >';
+                }
+
+            
+                foreach ($terms as $term) {
+                     //spre($term);
+                    $html .='
+                        <option value="'. $term->slug.'" >
+                            <a href="'.get_term_link( $term->term_id ).'" data-toggle="dropdown" class="dropdown-toggle dropdown-item w-100">'.$term->name.' </a>
+                        </option>
+    
+                    ';
+
+                }
+                $html .='  
+                        </select>
+
+                    </form>
+                    
+
+                ';
+                $html .= '
+                <script>
+                function set_cat_id(){
+                    var id_value = document.getElementById("filter_cat").value;
+                    document.getElementById("rtcl_category").value = id_value;
+                }
+                
+                function  set_location_id(){
+                    var id_value = document.getElementById("filter_location").value;
+                    document.getElementById("rtcl_location").value = id_value
+                }
+                        
+            </script>
+                ';
+
+           // }
+
+        }else{
+
+
+            $current_term = !empty($args['parent']) ? $args['parent'] : '';
+            if( gettype($current_term) === 'object'){
+
+                $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $current_term) : $terms;
+                $html = '
+                <form id="filter_abdoads">
+                    <input type="hidden" id="category_abdoads"  value="0">
+                    <input type="hidden" id="location_abdoads" value="0">
+
+                    <label>'. $current_term->name.' </label>
+                ';
+
+                if($args['taxonomy'] == "rtcl_category"){
+
+                    $html .= '<select id="filter_cat"  onchange="set_cat_id()" >';
+                
+                }elseif($args['taxonomy'] == "rtcl_location"){
+                   
+                    $html .= '<select id="filter_location"  onchange="set_location_id()" >';
+                }
+
+            
+                foreach ($terms as $term) {
+                    //  pre($term);
+                    $html .='
+                        <option value="'. $term->term_id.'" >
+                            <a href="'.get_term_link( $term->term_id ).'" data-toggle="dropdown" class="dropdown-toggle dropdown-item w-100">'.$term->name.' </a>
+                        </option>
+    
+                    ';
+
+                }
+                $html .='  
+                        </select>
+
+                    </form>
+                    
+
+                ';
+                $html .= '
+                <script>
+                    function set_cat_id(){
+                        var id_value = document.getElementById("filter_cat").value;
+                        document.getElementById("category_abdoads").value = id_value
+                    }
+                   
+                    function  set_location_id(){
+                        var id_value = document.getElementById("filter_location").value;
+                        document.getElementById("location_abdoads").value = id_value
+                    }
+                    
+                </script>
+                ';
+
+            }
+
+        }
+       return $html;
+    }
     /**
      * @param String $taxonomy
      * @param array  $data
