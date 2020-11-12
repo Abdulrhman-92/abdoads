@@ -123,7 +123,8 @@ class InlineSearchAjax
             wp_send_json_success( Functions::get_sub_terms_filter_html($args));
 
         }else{
-            wp_send_json_success("<p id='rtcl_cat_$cat' tax='rtcl_category' level ='$level'>
+            $level = $level +1;
+            wp_send_json_success("<p id='rtcl_cat_$cat' tax='$cat' level ='$level'>
             This is the last ".$tax_type."</p>");
         }
     }
