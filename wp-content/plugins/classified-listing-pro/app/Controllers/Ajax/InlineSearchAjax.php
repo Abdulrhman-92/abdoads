@@ -85,9 +85,7 @@ class InlineSearchAjax
     }
 
 
-    static function rtcl_ajax_taxonomy_filter_get_sub_level_html() {
-        //print_r($_REQUEST);
-        
+    static function rtcl_ajax_taxonomy_filter_get_sub_level_html() {       
         $slug           =   $_REQUEST["slug"];
         $cat            =   $_REQUEST["taxonomy"];
         $exploade_tax   =   explode("_",$cat);

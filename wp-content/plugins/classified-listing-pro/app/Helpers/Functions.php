@@ -1129,7 +1129,6 @@ class Functions
                                 var i;
 
                                 for (i = 0 ; i < elements_cat.length ; i++) {
-                                    //alert( result.data);
                                     var item        =  elements_cat[i];
                                     var item_level  = item.getAttribute("level");
                                     if (level < item_level) {var visibility = 0 ;
@@ -1156,7 +1155,6 @@ class Functions
                                 var i;
 
                                 for (i = 0 ; i < elements_loc.length ; i++) {
-                                    //alert( result.data);
                                     var item        =  elements_loc[i];
                                     var item_level  = item.getAttribute("level");
                                     if (level < item_level) {var visibility = 0 ;
