@@ -1047,12 +1047,13 @@ class Functions
         return $html;
     }
     static function get_sub_terms_filter_html($args, $terms = []) {
+       // pre($args);
         $html = '';
         $url = get_site_url( null, "/wp-admin/admin-ajax.php", null );
         $current_term = !empty($args['instance']['current_taxonomy'][$args['taxonomy']]) ? (object)$args['instance']['current_taxonomy'][$args['taxonomy']] : '';
         if($current_term == ''){
-            $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $args['parent']) : $terms;
 
+            $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $args['parent']) : $terms;
         }else{
             $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $current_term->term_id) : $terms;
 
@@ -1080,18 +1081,26 @@ class Functions
         
             
 
-    
-        foreach ($terms as $term) {
+        if(!empty($terms)){
+            foreach ($terms as $term) {
             
-            $html .='
-                <option  value="'. $term->slug.'" class="dropdown-item dropdown-submenu p-0" >
-                    '.$term->name.' 
+                $html .='
+                    <option  value="'. $term->slug.'" class="dropdown-item dropdown-submenu p-0" >
+                        '.$term->name.' 
                     </option>
-                </option>
+    
+                ';
+    
+            }
+        }else{
+            $html .='
+            <option  value="'. $current_term->slug.'" class="dropdown-item dropdown-submenu p-0" >
+                <p> '.$current_term->name.'</p>
 
+            </option>
             ';
-
         }
+
        
         $html .='  
             </select>                    
