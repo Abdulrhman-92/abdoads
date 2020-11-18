@@ -1047,10 +1047,12 @@ class Functions
         return $html;
     }
     static function get_sub_terms_filter_html($args, $terms = []) {
-       // pre($args);
+       //pre($args);
         $html = '';
         $url = get_site_url( null, "/wp-admin/admin-ajax.php", null );
         $current_term = !empty($args['instance']['current_taxonomy'][$args['taxonomy']]) ? (object)$args['instance']['current_taxonomy'][$args['taxonomy']] : '';
+        //pre($current_term);
+
         if($current_term == ''){
 
             $terms = empty($terms) ? Functions::get_sub_terms($args['taxonomy'], $args['parent']) : $terms;
@@ -1069,21 +1071,42 @@ class Functions
         if($args['taxonomy'] == "rtcl_category"){
 
             $html .= '
-                <select id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_category" level ="'.$level.'">
+                <select id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_category" level ="'.$level.'" style=" margin-bottom: 8px;">
+                
+       
             ';
-        
+            if ($current_term == '') {
+                $html .='
+                    <option  value="select category" class="dropdown-item dropdown-submenu p-0" > Select Category </option>
+                ';
+            }
         }elseif($args['taxonomy'] == "rtcl_location"){
             
             $html .= '
-                <select id="rtcl_location_'.$level.'" onchange="append_child(this)" tax = "rtcl_location" level ="'.$level.'">
+                <select id="rtcl_location_'.$level.'" onchange="append_child(this)" tax = "rtcl_location" level ="'.$level.'" style=" margin-bottom: 8px;">
             ';
+            if ($current_term == '') {
+                $html .='
+                    <option  value="select location" class="dropdown-item dropdown-submenu p-0" > Select Location </option>
+                ';
+            }
         }
         
             
 
         if(!empty($terms)){
+            $taxonomy = $args['taxonomy'];
+
             foreach ($terms as $term) {
-            
+                global $sitepress;
+                global $icl_adjust_id_url_filter_off;
+                $default_term_id = (int) icl_object_id( $term->term_id, $taxonomy, true, $sitepress->get_default_language() );
+                $orig_flag_value = $icl_adjust_id_url_filter_off;
+             
+                $icl_adjust_id_url_filter_off = true;
+                $term = get_term( $default_term_id, $taxonomy );
+                $icl_adjust_id_url_filter_off = $orig_flag_value;               
+
                 $html .='
                     <option  value="'. $term->slug.'" class="dropdown-item dropdown-submenu p-0" >
                         '.$term->name.' 
@@ -1096,15 +1119,144 @@ class Functions
             $html .='
             <option  value="'. $current_term->slug.'" class="dropdown-item dropdown-submenu p-0" >
                 <p> '.$current_term->name.'</p>
-
             </option>
             ';
         }
 
        
         $html .='  
-            </select>                    
+            </select>   
         ';
+        
+        
+        if(empty($current_term) && $args['parent'] > 0 ){
+            $filterTypes =array (
+                'text',
+                'textarea',
+                'number',
+                'checkbox',
+                'select',
+                'radio',
+                'date'
+            );
+      
+            $c_ids =  Functions::get_custom_field_ids($args["parent"]); 
+            if (isset($c_ids)&&!empty($c_ids)) {
+                $html .= '<div id="filter" level ="'.$level.'" name="" class ="filter-abdoadz">' ;
+
+                $i = 1;
+                foreach ($c_ids as $c_id) {
+                    $field = new RtclCFGField($c_id);
+                    if (in_array($field->getType(), $filterTypes) && $field->isSearchable()) {
+                        $field_html = $isOpen = null;
+                        $metaKey = $field->getMetaKey();
+                        if ($field->getType() == "number") {
+                            $fMinValue = !empty($filters[$metaKey]['min']) ? esc_attr($filters[$metaKey]['min']) : null;
+                            $fMaxValue = !empty($filters[$metaKey]['max']) ? esc_attr($filters[$metaKey]['max']) : null;
+                            $isOpen = $fMinValue || $fMaxValue ? ' is-open' : null;
+                            $field_html .= 
+                                sprintf('<div class="form-group row">
+                                                <div class="col-md-6">
+                                                    <div class="ui-field">
+                                                        <input id="filters[%1$s][min]" name="filters[%1$s][min]" type="number" value="%2$s" class="ui-input form-control" placeholder="%3$s">									
+                                                    </div>											
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="ui-field">
+                                                        <input id="filters[%1$s][max]" name="filters[%1$s][max]" type="number" value="%4$s" class="ui-input form-control" placeholder="%5$s">
+                                                    </div>
+                                                </div>
+                                            </div>',
+                                $metaKey,
+                                $fMinValue,
+                                esc_html__('Min.', 'classified-listing'),
+                                $fMaxValue,
+                                esc_html__('Max.', 'classified-listing')
+                            );
+                        } elseif ($field->getType() == "date") {
+                            $value = !empty($filters[$metaKey]) ? esc_attr($filters[$metaKey]) : null;
+                            $isOpen = $value ? ' is-open' : null;
+                            $date_type = $field->getDateType();
+                            $field_html .= sprintf('<div class="form-group">
+                                                            <div class="ui-field">
+                                                                <input id="filters[%1$s]" autocomplete="false" name="filters[%1$s]" type="text" value="%2$s" data-options="%4$s" class="ui-input form-control rtcl-date" placeholder="%3$s">									
+                                                            </div>	
+                                                    </div>',
+                                esc_attr($metaKey),
+                                esc_attr($value),
+                                esc_html__('Date', 'classified-listing'),
+                                htmlspecialchars(wp_json_encode($field->getDateFieldOptions(array(
+                                    'singleDatePicker' => $field->getDateSearchableType() == 'single' ? true : false,
+                                    'autoUpdateInput'  => false
+                                ))))
+                            );
+                        } elseif (in_array($field->getType(), ["text", "textarea"], true)) {
+                            $values = !empty($filters[$metaKey]) ? esc_attr($filters[$metaKey]) : null;
+                            $isOpen = $values ? ' is-open' : null;
+                            $field_html .= sprintf('<div class="form-group">
+                                        <input id="filters%1$s" name="filters[%1$s]" type="text" value="%2$s" class="ui-input form-control" placeholder="%3$s">
+                                    </div>',
+                                $metaKey,
+                                $values,
+                                apply_filters('rtcl_filter_custom_text_field_placeholder', sprintf(esc_html__('Search by %s', 'classified-listing'), $field->getLabel()), $field)
+                            );
+                        }elseif ($field->getType() == "select") {
+                            $values = !empty($filters[$metaKey]) ? $filters[$metaKey] : array();
+                            $isOpen = count($values) ? ' is-open' : null;
+                            $options = $field->getOptions();
+                            if (!empty($options['choices'])) {
+                                $field_html .= "<select class='ui-link-tree is-collapsed'>";
+                                foreach ($options['choices'] as $key => $option) {
+                                    $field_html .= "<option  class='filter-submit-trigger'>" . __($option,
+                                        'classified-listing') . "</option>"
+                                    ;
+                                }
+                                
+                                $field_html .= "</select>";
+                            }
+                        } else {
+                            $values = !empty($filters[$metaKey]) ? $filters[$metaKey] : array();
+                            $isOpen = count($values) ? ' is-open' : null;
+                            $options = $field->getOptions();
+                            if (!empty($options['choices'])) {
+                                $field_html .= "<ul class='ui-link-tree is-collapsed'>";
+                                foreach ($options['choices'] as $key => $option) {
+                                    $checked = in_array($key, $values) ? " checked " : '';
+                                    $field_html .= "<li class='ui-link-tree-item {$field->getMetaKey()}-{$key}'>";
+                                    $field_html .= "<input id='filters{$metaKey}-values-{$key}' name='filters[{$metaKey}][]' {$checked} value='{$key}' type='checkbox' class='ui-checkbox filter-submit-trigger'>";
+                                    $field_html .= "<a href='#' class='filter-submit-trigger'>" . __($option,
+                                            'classified-listing') . "</a>";
+                                    $field_html .= "</li>";
+                                }
+                                $field_html .= '<li class="is-opener"><span class="rtcl-more"><i class="rtcl-icon rtcl-icon-plus-circled"></i><span class="text">' . __("Show More",
+                                        "classified-listing") . '</span></span></li>';
+                                $field_html .= "</ul>";
+                            }
+
+                        }
+
+                        $html .= apply_filters('rtcl_widget_filter_custom_field_html', sprintf('
+                                    <div  class="rtcl-custom-field-filter rtcl-custom-field-filter-%s ui-accordion-item %s" style="margin-top: 15px;">
+                                        <span class="title-abdoadz">%s</span>
+                                        <div class="">%s</div>
+                                    </div>',
+                            $field->getType(),
+                            $isOpen,
+                            __($field->getLabel(), "classified-listing"),
+                            $field_html
+                        ), $field, $c_id, $filters);
+
+
+                    }
+
+                    $i++;
+                }
+                
+                $html .= '</div>' ;
+
+            }
+        }
+        
         
         $html .= '
             <script>
@@ -1134,27 +1286,41 @@ class Functions
 
                             if(taxonomy == "rtcl_category"){
                                 document.getElementById("rtcl_category").value =slug_value;
-
+                                if(document.getElementById("filter") !=null){
+                                    document.getElementById("filter").setAttribute("name", slug_value);
+                                }
                                 var i;
 
                                 for (i = 0 ; i < elements_cat.length ; i++) {
                                     var item        =  elements_cat[i];
                                     var item_level  = item.getAttribute("level");
+                                   
                                     if (level < item_level) {var visibility = 0 ;
                                         item.style.display = "none";
-                                    }else{var visibility = 1 ;}
+                                        if(document.getElementById("filter") !=null ){
+
+                                            var filter_level = document.getElementById("filter");
+                                            document.querySelectorAll(".filter-abdoadz").forEach(function(a) {
+                                                a.remove()
+                                            })
+                                        }
+                                    }else{
+                                        var visibility = 1 ;
+
+                                    }
                                 }
 
                                 if (visibility == 0){
                                     const Parent        = document.getElementById(id);
                                     const chiled        = document.createElement("div");
-                                    chiled.innerHTML    = result.data;
+                                    chiled.innerHTML    = result.data ;
                                     Parent.after(chiled);
                                 }else{
                                     const Parent        = document.getElementById(id);
                                     const chiled        = document.createElement("div");
-                                    chiled.innerHTML    = result.data;
-                                    Parent.after(chiled);   
+                                    chiled.innerHTML    = result.data ;
+                                    Parent.after(chiled); 
+  
                                 }
 
 
@@ -1190,6 +1356,18 @@ class Functions
                 }
 
             </script>
+            <style>
+                span.title-abdoadz {
+                    color: black;
+                    font-size: 16px;
+                    font-weight: 700;
+                }
+                .widget ul {
+                    list-style-type: none;
+                    margin: 3px;
+                    padding: 0;
+                }
+            </style>
         ';               
 
 
