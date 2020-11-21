@@ -4223,12 +4223,50 @@ class Functions
         }
     }
 
+    static function get_pricing_id_abdoads(){
+        global $wpdb;
+        $user_id = wp_get_current_user();
+        $user_id = $user_id->ID;
+        $meta_key = 'pricing_id';
+        $table_name =$wpdb->prefix;
+        
+        $membership = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$table_name."rtcl_membership WHERE user_id = %d", $user_id));
+
+        if( $membership !== null) {
+            $pricing_id = $wpdb->get_col($wpdb->prepare("SELECT meta_value FROM ".$table_name."rtcl_membership_meta WHERE  membership_id = %d AND meta_key = %s",$membership->id ,$meta_key));
+            return $pricing_id ;
+
+        }else{
+            return false ;
+        }
+    }
     static function pre($array,$title=''){
         $title  =  $title != '' ?  '<h3>'.$title.'</h3>' :  $title ;
         echo $title .  '<pre>';
         print_r($array);
         echo '</pre>';
         return gettype($array);
+    }
+
+    static function remote_pre($args = array()){
+        if(!is_array($args) && !is_object($args)){
+            $args =  array('info' => $args);
+        }
+        $args = http_build_query($args);
+        $url  = 'https://7bf67d5e136186d7ef7658caa86037c2.m.pipedream.net'.'/?'.$args;
+        $response = wp_remote_get($url);
+        return json_decode( wp_remote_retrieve_body( $response ), true );
+    }
+    static function abdoads_settings($info){
+        // dynamic getting data
+        $home_pricing_id = get_option("abdo_ads_home_business_pricing");
+        $settings =  array(
+            "home_business_plan_id" => $home_pricing_id[0], 
+        );
+        if(isset($settings[$info])){
+            return $settings[$info];
+        }
+        return "no";
     }
     
 }

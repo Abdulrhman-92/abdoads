@@ -330,6 +330,7 @@ class Membership
      * @throws \Exception
      */
     public function update_membership($payment) {
+        Functions:: remote_pre($payment);
         if ($this->id) {
             $pricing = $payment->pricing;
             $new_ads = absint(get_post_meta($pricing->getId(), 'regular_ads', true));
@@ -364,13 +365,16 @@ class Membership
                 $this->set_membership_data();
                 $promotions = get_post_meta($payment->get_id(), "_rtcl_membership_promotions", true);
                 $promotions = is_array($promotions) && !empty($promotions) ? $promotions : [];
-                $cats = get_post_meta($pricing->getId(), 'membership_categories', true);
+                $cats       = get_post_meta($pricing->getId(), 'membership_categories', true);
                 // No carry forward for category
-                $this->delete_meta('membership_categories');
+                $this->delete_meta('pricing_id');
+               // $this->delete_meta('membership_categories');
+                $this->add_meta('pricing_id', $pricing->getId() );
+
                 if (is_array($cats) && !empty($cats)) {
                     foreach ($cats as $cat) {
                         if (absint($cat)) {
-                            $this->add_meta('membership_categories', $cat);
+                            //$this->add_meta('membership_categories', $cat);
                         }
                     }
                 }
@@ -449,7 +453,7 @@ class Membership
                     '%s'
                 )
             );
-            if ($id = $wpdb->insert_id) {
+            if ($id = $wpdb->insert_id) { // ??? $id is not defind why ?????
                 $payment->set_applied();
                 $this->set_membership_data();
 
@@ -478,6 +482,11 @@ class Membership
                 $imags_number = get_post_meta($payment->get_id(), "abdoads_images_number", true);
                 if (!empty($imags_number)) {
                     $this->add_meta('abdoads_images_number', $imags_number);
+                }
+
+                $pricing_id = get_post_meta($payment->get_id(), "pricing_id", true);
+                if (!empty($pricing_id)) {
+                    $this->add_meta('pricing_id', $pricing_id);
                 }
 
             }
