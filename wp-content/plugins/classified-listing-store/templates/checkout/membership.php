@@ -9,7 +9,15 @@
 
 
 use Rtcl\Helpers\Functions;
+use RtclStore\Models\Membership;
 
+$member = rtclStore()->factory->get_membership();
+if ($member->has_membership()){
+    echo 'you have membership';
+}else{
+    echo 'you dont have membership';
+
+}
 ?>
 <section
     class="elementor-section elementor-top-section elementor-element elementor-element-92ce9b2 elementor-section-boxed elementor-section-height-default elementor-section-height-default"
@@ -79,6 +87,7 @@ use Rtcl\Helpers\Functions;
                            
                             <?php 
                                 if (!empty($pricing_options)) {
+                                   // Functions:: pre($pricing_options , 'pricing_options');
                                     foreach ($pricing_options as $option) {
                                         $price = get_post_meta($option->ID, 'price', true);
                                  
@@ -191,7 +200,7 @@ use Rtcl\Helpers\Functions;
 </table>
 ------------->
 <br>
-<div id="chooseCat" style="visibility: visible">
+<div id="chooseCat" style="display: contents">
     <h4 class="pm-heading"><?php esc_html_e(" Select Category", "classified-listing-store"); ?></h4>
 
     <table
@@ -244,11 +253,11 @@ use Rtcl\Helpers\Functions;
         var elem = document.getElementById(element);
         var price = elem.getAttribute('data-price');
         if (price == 0) {
-            document.getElementById('chooseCat').style.visibility='hidden';
+            document.getElementById('chooseCat').style.display='none';
             document.getElementById('selectCat').removeAttribute("required");
             
         }else{
-            document.getElementById('chooseCat').style.visibility='visible';
+            document.getElementById('chooseCat').style.display='contents';
             document.getElementById('selectCat').attributes.required = "required";
 
 

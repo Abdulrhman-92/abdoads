@@ -4222,12 +4222,13 @@ class Functions
             return false ;
         }
     }
+
+    static function pre($array,$title=''){
+        $title  =  $title != '' ?  '<h3>'.$title.'</h3>' :  $title ;
+        echo $title .  '<pre>';
+        print_r($array);
+        echo '</pre>';
+        return gettype($array);
+    }
     
-}
-function pre($array,$title=''){
-    $title  =  $title != '' ?  '<h3>'.$title.'</h3>' :  $title ;
-    echo $title .  '<pre>';
-    print_r($array);
-    echo '</pre>';
-    return gettype($array);
 }
