@@ -1068,7 +1068,7 @@ class Functions
 
         ';
 
-        if($args['taxonomy'] == "rtcl_category"){
+        if($args['taxonomy'] == "rtcl_category" && !empty($terms)){
 
             $html .= '
                 <select id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_category" level ="'.$level.'" style=" margin-bottom: 8px;">
@@ -1080,7 +1080,7 @@ class Functions
                     <option  value="select category" class="dropdown-item dropdown-submenu p-0" > Select Category </option>
                 ';
             }
-        }elseif($args['taxonomy'] == "rtcl_location"){
+        }elseif($args['taxonomy'] == "rtcl_location" && !empty($terms)){
             
             $html .= '
                 <select id="rtcl_location_'.$level.'" onchange="append_child(this)" tax = "rtcl_location" level ="'.$level.'" style=" margin-bottom: 8px;">
@@ -1115,18 +1115,26 @@ class Functions
                 ';
     
             }
-        }else{
-            $html .='
-            <option  value="'. $current_term->slug.'" class="dropdown-item dropdown-submenu p-0" >
-                <p> '.$current_term->name.'</p>
-            </option>
+            $html .='  
+                </select>   
             ';
+        }else{
+            if($args['taxonomy'] == "rtcl_category"){
+                $html .='
+        
+                    <p id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_category" level ="'.$level.'" style=" margin-bottom: 8px;"> this is the last category </p>
+                ';
+            }elseif($args['taxonomy'] == "rtcl_location"){
+                $html .='
+        
+                    <p id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_location" level ="'.$level.'" style=" margin-bottom: 8px;"> this is the last location </p>
+                ';
+            }
+  
         }
 
        
-        $html .='  
-            </select>   
-        ';
+
         
         
         if($current_term == '' && $args['parent'] > 0 ){
