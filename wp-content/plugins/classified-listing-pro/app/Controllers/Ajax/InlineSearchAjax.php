@@ -116,14 +116,8 @@ class InlineSearchAjax
         $terms= get_terms($args);
         
 
-        if(!empty($terms)){
-            wp_send_json_success( Functions::get_sub_terms_filter_html($args));
+        wp_send_json_success( Functions::get_sub_terms_filter_html($args));
 
-        }else{
-            $level = $level +1;
-            wp_send_json_success("<p id='rtcl_cat_$cat' tax='$cat' level ='$level'>
-            This is the last ".$tax_type."</p>");
-        }
     }
 
     public static function rtcl_inline_search_autocomplete() {

@@ -1051,7 +1051,7 @@ class Functions
         $html = '';
         $url = get_site_url( null, "/wp-admin/admin-ajax.php", null );
         $current_term = !empty($args['instance']['current_taxonomy'][$args['taxonomy']]) ? (object)$args['instance']['current_taxonomy'][$args['taxonomy']] : '';
-        //pre($current_term);
+        //Functions:: pre($current_term);
 
         if($current_term == ''){
 
@@ -1129,7 +1129,7 @@ class Functions
         ';
         
         
-        if(empty($current_term) && $args['parent'] > 0 ){
+        if($current_term == '' && $args['parent'] > 0 ){
             $filterTypes =array (
                 'text',
                 'textarea',
@@ -1142,6 +1142,7 @@ class Functions
       
             $c_ids =  Functions::get_custom_field_ids($args["parent"]);
             $filters = !empty($_GET['filters']) ? $_GET['filters'] : array();
+            //Functions:: pre($c_ids);
             if (isset($c_ids)&&!empty($c_ids)) {
                 $html .= '<div id="filter" level ="'.$level.'" name="" class ="filter-abdoadz">' ;
 
