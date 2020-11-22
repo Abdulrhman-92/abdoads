@@ -1122,12 +1122,12 @@ class Functions
             if($args['taxonomy'] == "rtcl_category"){
                 $html .='
         
-                    <p id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_category" level ="'.$level.'" style=" margin-bottom: 8px;"> this is the last category </p>
+                    <p id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_category" level ="'.$level.'" >  </p>
                 ';
             }elseif($args['taxonomy'] == "rtcl_location"){
                 $html .='
         
-                    <p id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_location" level ="'.$level.'" style=" margin-bottom: 8px;"> this is the last location </p>
+                    <p id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_location" level ="'.$level.'" >  </p>
                 ';
             }
   
