@@ -1101,12 +1101,12 @@ class Functions
                 global $sitepress;
                 global $icl_adjust_id_url_filter_off;
                 $default_term_id = (int) icl_object_id( $term->term_id, $taxonomy, true, $sitepress->get_default_language() );
+
                 $orig_flag_value = $icl_adjust_id_url_filter_off;
-             
+
                 $icl_adjust_id_url_filter_off = true;
                 $term = get_term( $default_term_id, $taxonomy );
                 $icl_adjust_id_url_filter_off = $orig_flag_value;               
-
                 $html .='
                     <option  value="'. $term->slug.'" class="dropdown-item dropdown-submenu p-0" >
                         '.$term->name.' 
@@ -1140,7 +1140,8 @@ class Functions
                 'date'
             );
       
-            $c_ids =  Functions::get_custom_field_ids($args["parent"]); 
+            $c_ids =  Functions::get_custom_field_ids($args["parent"]);
+            $filters = !empty($_GET['filters']) ? $_GET['filters'] : array();
             if (isset($c_ids)&&!empty($c_ids)) {
                 $html .= '<div id="filter" level ="'.$level.'" name="" class ="filter-abdoadz">' ;
 
@@ -1214,7 +1215,7 @@ class Functions
                                 
                                 $field_html .= "</select>";
                             }
-                        } else {
+                        }else {
                             $values = !empty($filters[$metaKey]) ? $filters[$metaKey] : array();
                             $isOpen = count($values) ? ' is-open' : null;
                             $options = $field->getOptions();
@@ -1373,6 +1374,7 @@ class Functions
 
        return $html;
     }
+    
     /**
      * @param String $taxonomy
      * @param array  $data
