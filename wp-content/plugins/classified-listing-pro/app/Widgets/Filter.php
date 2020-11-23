@@ -238,10 +238,10 @@ class Filter extends \WP_Widget
             $field_html = sprintf('<div class="form-group">
 							            <div class="row">
 							                <div class="col-md-6 col-6">
-							                    <input type="number" name="filters[price][min]" class="form-control" placeholder="%s" value="%s">
+							                    <input type="number" name="filters[price][min]" class="form-control" placeholder="%s" min="0" value="%s">
 							                </div>
 							                <div class="col-md-6 col-6">
-							                    <input type="number" name="filters[price][max]" class="form-control" placeholder="%s" value="%s">
+							                    <input type="number" name="filters[price][max]" class="form-control" placeholder="%s" min = "0" value="%s">
 							                </div>
 							                <div class="col-md-12">
 							                	<div class="ui-buttons has-expanded"><button class="btn btn-primary">%s</button></div>

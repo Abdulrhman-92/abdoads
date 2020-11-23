@@ -930,6 +930,7 @@ class TemplateHooks
         ?>
             <input type="hidden" id="rtcl_category" name="rtcl_category" value="<?php echo esc_attr($current_category) ?>">
             <input type="hidden" id="rtcl_location" name="rtcl_location" value="<?php echo esc_attr($current_location) ?>">
+            <input type="hidden" id="rtcl_location" name="rtcl_location" value="<?php echo esc_attr($current_location) ?>">
         <?php
     }
 }

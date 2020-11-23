@@ -1097,7 +1097,7 @@ class Functions
         if(!empty($terms)){
             $taxonomy = $args['taxonomy'];
 
-            foreach ($terms as $term) {
+                foreach ($terms as $term) {
                 global $sitepress;
                 global $icl_adjust_id_url_filter_off;
                 $default_term_id = (int) icl_object_id( $term->term_id, $taxonomy, true, $sitepress->get_default_language() );
@@ -1118,19 +1118,33 @@ class Functions
             $html .='  
                 </select>   
             ';
+        }elseif(empty($terms) && $current_term !== ''){
+            if($args['taxonomy'] == "rtcl_category"){
+                $html .='
+                <div  value="'. $current_term->slug.'" class="dropdown-item dropdown-submenu p-0" >
+                    '.$current_term->name.'
+                </div>
+                ';
+            }elseif($args['taxonomy'] == "rtcl_location"){
+                $html .='
+                    <div  value="'. $current_term->slug.'" class="dropdown-item dropdown-submenu p-0" >
+                        '.$current_term->name.'
+                    </div>
+                ';
+            }
+  
         }else{
             if($args['taxonomy'] == "rtcl_category"){
                 $html .='
-        
+                    </select>   
                     <p id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_category" level ="'.$level.'" >  </p>
                 ';
             }elseif($args['taxonomy'] == "rtcl_location"){
                 $html .='
-        
+                    </select>   
                     <p id="rtcl_cat_'.$level.'" onchange="append_child(this)" tax="rtcl_location" level ="'.$level.'" >  </p>
                 ';
             }
-  
         }
 
        
@@ -1210,39 +1224,27 @@ class Functions
                                 $values,
                                 apply_filters('rtcl_filter_custom_text_field_placeholder', sprintf(esc_html__('Search by %s', 'classified-listing'), $field->getLabel()), $field)
                             );
-                        }elseif ($field->getType() == "select") {
+                        }else{
                             $values = !empty($filters[$metaKey]) ? $filters[$metaKey] : array();
                             $isOpen = count($values) ? ' is-open' : null;
                             $options = $field->getOptions();
                             if (!empty($options['choices'])) {
-                                $field_html .= "<select class='ui-link-tree is-collapsed'>";
+                                $field_html .= "<input id='filter-data' name=''  value='' type='hidden' >";
+
+                                $field_html .= "<select id ='filter-select'  name='filters[{$metaKey}][]' class='ui-link-tree is-collapsed' onchange='filter_select(this)'>";
+                                $field_html .='
+                                    <option  > Select  </option>
+                                ';
                                 foreach ($options['choices'] as $key => $option) {
-                                    $field_html .= "<option  class='filter-submit-trigger'>" . __($option,
-                                        'classified-listing') . "</option>"
-                                    ;
+                                    $checked = in_array($key, $values) ? " selected " : '';
+                                    $field_html .= "<option  id='filters{$metaKey}-values-{$key}' class='ui-link-tree-item {$field->getMetaKey()}-{$key}' name='filters[{$metaKey}][]' {$checked} value='{$key}'>";
+                                    $field_html .= "". __($option, 'classified-listing') ."";
+                                    $field_html .= "</option>";
+
                                 }
                                 
                                 $field_html .= "</select>";
                             }
-                        }else {
-                            $values = !empty($filters[$metaKey]) ? $filters[$metaKey] : array();
-                            $isOpen = count($values) ? ' is-open' : null;
-                            $options = $field->getOptions();
-                            if (!empty($options['choices'])) {
-                                $field_html .= "<ul class='ui-link-tree is-collapsed'>";
-                                foreach ($options['choices'] as $key => $option) {
-                                    $checked = in_array($key, $values) ? " checked " : '';
-                                    $field_html .= "<li class='ui-link-tree-item {$field->getMetaKey()}-{$key}'>";
-                                    $field_html .= "<input id='filters{$metaKey}-values-{$key}' name='filters[{$metaKey}][]' {$checked} value='{$key}' type='checkbox' class='ui-checkbox filter-submit-trigger'>";
-                                    $field_html .= "<a href='#' class='filter-submit-trigger'>" . __($option,
-                                            'classified-listing') . "</a>";
-                                    $field_html .= "</li>";
-                                }
-                                $field_html .= '<li class="is-opener"><span class="rtcl-more"><i class="rtcl-icon rtcl-icon-plus-circled"></i><span class="text">' . __("Show More",
-                                        "classified-listing") . '</span></span></li>';
-                                $field_html .= "</ul>";
-                            }
-
                         }
 
                         $html .= apply_filters('rtcl_widget_filter_custom_field_html', sprintf('
@@ -1255,7 +1257,6 @@ class Functions
                             __($field->getLabel(), "classified-listing"),
                             $field_html
                         ), $field, $c_id, $filters);
-
 
                     }
 
@@ -1292,8 +1293,17 @@ class Functions
                             level : level,
                             taxonomy : taxonomy
                         },
+                        beforeSend: function() {
+                            // setting a timeout
+                            const Parent        = document.getElementById(id);
+                            const chiled        = document.createElement("div");
+                            chiled.classList.add ("loader");
+                            Parent.after(chiled);
+                        },
                         success: function(result){
-
+                            document.querySelectorAll(".loader").forEach(function(a) {
+                                a.remove()
+                            })
                             if(taxonomy == "rtcl_category"){
                                 document.getElementById("rtcl_category").value =slug_value;
                                 if(document.getElementById("filter") !=null){
@@ -1364,7 +1374,16 @@ class Functions
                         }
                     });
                 }
+                function filter_select(element){
+                    
+                    var id                  =   element.id; 
+                    var value               =   document.getElementById(id).value;
+                    var name                =   document.getElementById(id).getAttribute("name");
+                    var data                =   document.getElementById("filter-data");
 
+                    data.value = value ;
+                    data.setAttribute("name", name);
+                }
             </script>
             <style>
                 span.title-abdoadz {
@@ -1376,6 +1395,20 @@ class Functions
                     list-style-type: none;
                     margin: 3px;
                     padding: 0;
+                }
+                .loader {
+                    margin-left: 37%;
+                    border: 6px solid #f3f3f3;
+                    border-top: 6px solid #3498db;
+                    border-radius: 50%;
+                    width: 50px;
+                    height: 50px;
+                    animation: spin 2s linear infinite;
+                }
+                  
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
                 }
             </style>
         ';               
