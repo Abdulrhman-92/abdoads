@@ -271,7 +271,7 @@ class Filter extends \WP_Widget
     /**
      * @return string
      */
-    public function get_custom_field_filter() {
+    public function get_custom_field_filter_original() {
         if (!empty($this->instance['search_by_custom_fields'])) {
             $html = '';
             $current_term = get_queried_object();
@@ -377,5 +377,112 @@ class Filter extends \WP_Widget
             return $html;
         }
     }
+    public function get_custom_field_filter() {
+        if (!empty($this->instance['search_by_custom_fields'])) {
+            $html = '';
+            $current_term = get_queried_object();
+            if (is_a($current_term, \WP_Term::class) && rtcl()->category === $current_term->taxonomy) {
+                $filters = !empty($_GET['filters']) ? $_GET['filters'] : array();
+                $c_ids = Functions::get_custom_field_ids($current_term->term_id);
+                if (!empty($c_ids)) {
+                    $i = 1;
+                    foreach ($c_ids as $c_id) {
+                        $field = new RtclCFGField($c_id);
+                        if (in_array($field->getType(), $this->filterTypes) && $field->isSearchable()) {
+                            $field_html = $isOpen = null;
+                            $metaKey = $field->getMetaKey();
+                            if ($field->getType() == "number") {
+                                $fMinValue = !empty($filters[$metaKey]['min']) ? esc_attr($filters[$metaKey]['min']) : null;
+                                $fMaxValue = !empty($filters[$metaKey]['max']) ? esc_attr($filters[$metaKey]['max']) : null;
+                                $isOpen = $fMinValue || $fMaxValue ? ' is-open' : null;
+                                $field_html .= 
+                                    sprintf('<div class="form-group row">
+                                                    <div class="col-md-6">
+                                                        <div class="ui-field">
+                                                            <input id="filters[%1$s][min]" name="filters[%1$s][min]" type="number" value="%2$s" class="ui-input form-control" placeholder="%3$s">									
+                                                        </div>											
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="ui-field">
+                                                            <input id="filters[%1$s][max]" name="filters[%1$s][max]" type="number" value="%4$s" class="ui-input form-control" placeholder="%5$s">
+                                                        </div>
+                                                    </div>
+                                                </div>',
+                                    $metaKey,
+                                    $fMinValue,
+                                    esc_html__('Min.', 'classified-listing'),
+                                    $fMaxValue,
+                                    esc_html__('Max.', 'classified-listing')
+                                );
+                            } elseif ($field->getType() == "date") {
+                                $value = !empty($filters[$metaKey]) ? esc_attr($filters[$metaKey]) : null;
+                                $isOpen = $value ? ' is-open' : null;
+                                $date_type = $field->getDateType();
+                                $field_html .= sprintf('<div class="form-group">
+                                                                <div class="ui-field">
+                                                                    <input id="filters[%1$s]" autocomplete="false" name="filters[%1$s]" type="text" value="%2$s" data-options="%4$s" class="ui-input form-control rtcl-date" placeholder="%3$s">									
+                                                                </div>	
+                                                        </div>',
+                                    esc_attr($metaKey),
+                                    esc_attr($value),
+                                    esc_html__('Date', 'classified-listing'),
+                                    htmlspecialchars(wp_json_encode($field->getDateFieldOptions(array(
+                                        'singleDatePicker' => $field->getDateSearchableType() == 'single' ? true : false,
+                                        'autoUpdateInput'  => false
+                                    ))))
+                                );
+                            } elseif (in_array($field->getType(), ["text", "textarea"], true)) {
+                                $values = !empty($filters[$metaKey]) ? esc_attr($filters[$metaKey]) : null;
+                                $isOpen = $values ? ' is-open' : null;
+                                $field_html .= sprintf('<div class="form-group">
+                                            <input id="filters%1$s" name="filters[%1$s]" type="text" value="%2$s" class="ui-input form-control" placeholder="%3$s">
+                                        </div>',
+                                    $metaKey,
+                                    $values,
+                                    apply_filters('rtcl_filter_custom_text_field_placeholder', sprintf(esc_html__('Search by %s', 'classified-listing'), $field->getLabel()), $field)
+                                );
+                            }else{
+                                $values = !empty($filters[$metaKey]) ? $filters[$metaKey] : array();
+                                $isOpen = count($values) ? ' is-open' : null;
+                                $options = $field->getOptions();
+                                if (!empty($options['choices'])) {
+                                    $field_html .= "<input id='filter-data' name=''  value='' type='hidden' >";
+    
+                                    $field_html .= "<select id ='filter-select'  name='filters[{$metaKey}][]' class='ui-link-tree is-collapsed' onchange='filter_select(this)'>";
+                                    $field_html .='
+                                        <option  > Select  </option>
+                                    ';
+                                    foreach ($options['choices'] as $key => $option) {
+                                        $checked = in_array($key, $values) ? " selected " : '';
+                                        $field_html .= "<option  id='filters{$metaKey}-values-{$key}' class='ui-link-tree-item {$field->getMetaKey()}-{$key}' name='filters[{$metaKey}][]' {$checked} value='{$key}'>";
+                                        $field_html .= "". __($option, 'classified-listing') ."";
+                                        $field_html .= "</option>";
+    
+                                    }
+                                    
+                                    $field_html .= "</select>";
+                                }
+                            }
+    
+                            $html .= apply_filters('rtcl_widget_filter_custom_field_html', sprintf('
+                                        <div  class="rtcl-custom-field-filter rtcl-custom-field-filter-%s ui-accordion-item %s" style="margin-top: 15px;">
+                                            <span class="title-abdoadz">%s</span>
+                                            <div class="">%s</div>
+                                        </div>',
+                                $field->getType(),
+                                $isOpen,
+                                __($field->getLabel(), "classified-listing"),
+                                $field_html
+                            ), $field, $c_id, $filters);
+    
+                        }
 
+                        $i++;
+                    }
+                }
+            }
+
+            return $html;
+        }
+    }
 }
