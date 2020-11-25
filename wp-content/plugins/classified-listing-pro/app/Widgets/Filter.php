@@ -271,7 +271,7 @@ class Filter extends \WP_Widget
     /**
      * @return string
      */
-    public function get_custom_field_filter_original() {
+    public function get_custom_field_filter() {
         if (!empty($this->instance['search_by_custom_fields'])) {
             $html = '';
             $current_term = get_queried_object();
@@ -377,7 +377,7 @@ class Filter extends \WP_Widget
             return $html;
         }
     }
-    public function get_custom_field_filter() {
+    public function get_custom_field_filter_original() {
         if (!empty($this->instance['search_by_custom_fields'])) {
             $html = '';
             $current_term = get_queried_object();
