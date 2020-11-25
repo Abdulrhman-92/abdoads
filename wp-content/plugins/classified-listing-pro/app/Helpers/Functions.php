@@ -1233,7 +1233,7 @@ class Functions
 
                                 $field_html .= "<select id ='filter-select'  name='filters[{$metaKey}][]' class='ui-link-tree is-collapsed' onchange='filter_select(this)'>";
                                 $field_html .='
-                                    <option  > Select  </option>
+                                    <option value=""> Select  </option>
                                 ';
                                 foreach ($options['choices'] as $key => $option) {
                                     $checked = in_array($key, $values) ? " selected " : '';
