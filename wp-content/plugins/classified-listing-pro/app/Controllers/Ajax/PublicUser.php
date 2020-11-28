@@ -495,6 +495,8 @@ class PublicUser
             $user_meta['_rtcl_address'] = !empty($_POST['address']) ? esc_textarea($_POST['address']) : null;
             $user_meta['_rtcl_latitude'] = !empty($_POST['latitude']) ? esc_attr($_POST['latitude']) : null;
             $user_meta['_rtcl_longitude'] = !empty($_POST['longitude']) ? esc_attr($_POST['longitude']) : null;
+ 
+
             $location = array();
             if (!empty($_POST['location']) && $state = absint($_POST['location'])) {
                 array_push($location, $state);
@@ -513,6 +515,10 @@ class PublicUser
 
             $error = false;
             $msg = __("Your account has been updated.", "classified-listing");
+        }
+        $facebook= !empty($_POST['facebook']) ? esc_attr($_POST['facebook']) : null;
+        if(!empty($facebook)){
+            update_field('facebook', $facebook,'user_'. $user_data['ID']);
         }
         if (is_array($msg) && count($msg)) {
             $m = null;

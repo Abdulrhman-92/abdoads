@@ -1374,6 +1374,7 @@
           pass2: $form.find("input[name='pass2']").val(),
           phone: $form.find("input[name='phone']").val(),
           whatsapp_number: $form.find("input[name='whatsapp_number']").val(),
+          facebook: $form.find("input[name='facebook']").val(),
           website: $form.find("input[name='website']").val(),
           zipcode: $form.find("input[name='zipcode']").val(),
           address: $form.find("textarea[name='address']").val(),

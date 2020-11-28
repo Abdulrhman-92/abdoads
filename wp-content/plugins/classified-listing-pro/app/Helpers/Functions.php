@@ -1075,21 +1075,17 @@ class Functions
                 
        
             ';
-            if ($current_term == '') {
-                $html .='
-                    <option  value="select category" class="dropdown-item dropdown-submenu p-0" > Select Category </option>
-                ';
-            }
+            $html .='
+                <option  value="select category" class="dropdown-item dropdown-submenu p-0" > Select Category </option>
+            ';
         }elseif($args['taxonomy'] == "rtcl_location" && !empty($terms)){
             
             $html .= '
                 <select id="rtcl_location_'.$level.'" onchange="append_child(this)" tax = "rtcl_location" level ="'.$level.'" style=" margin-bottom: 8px;">
             ';
-            if ($current_term == '') {
-                $html .='
-                    <option  value="select location" class="dropdown-item dropdown-submenu p-0" > Select Location </option>
-                ';
-            }
+            $html .='
+                <option  value="select location" class="dropdown-item dropdown-submenu p-0" > Select Location </option>
+            ';
         }
         
             
@@ -1161,10 +1157,10 @@ class Functions
                 'radio',
                 'date'
             );
-      
+            $icons = Options::get_icon_list();
             $c_ids =  Functions::get_custom_field_ids($args["parent"]);
             $filters = !empty($_GET['filters']) ? $_GET['filters'] : array();
-            //Functions:: pre($c_ids);
+            //Functions:: pre($icons);
             if (isset($c_ids)&&!empty($c_ids)) {
                 $html .= '<div id="filter" level ="'.$level.'" name="" class ="filter-abdoadz">' ;
 
@@ -4312,5 +4308,6 @@ class Functions
         }
         return "no";
     }
+   
     
 }

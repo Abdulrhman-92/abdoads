@@ -15,7 +15,6 @@ if (!defined('ABSPATH')) {
 do_action('rtcl_before_edit_account_form'); ?>
 
 <form class="rtcl-EditAccountForm form-horizontal classima-form" id="rtcl-user-account" method="post">
-
 	<?php do_action( 'rtcl_edit_account_form_start' ); ?>
 
     <div class="classima-form-section">
@@ -143,6 +142,20 @@ do_action('rtcl_before_edit_account_form'); ?>
                 </div>
             </div>
         </div>
+        <?php
+            $facebook = get_field( 'facebook' , 'user_'. $user->ID );
+        ?>
+        <div class="row classima-acc-form-email-row">
+            <div class="col-sm-3 col-12">
+                <label class="control-label"><?php esc_html_e( 'Facebook', 'classima' ); ?></label>
+            </div>
+            <div class="col-sm-9 col-12">
+                <div class="form-group">
+                    <input type="text" name="facebook" id="rtcl-facebook" class="form-control" value="<?php echo esc_attr($facebook); ?>" onchange="change_facebook(this)"></input>
+                </div>
+            </div>
+        </div>
+
 
         <div class="row classima-acc-form-whatsapp-row">
             <div class="col-sm-3 col-12">
@@ -165,6 +178,8 @@ do_action('rtcl_before_edit_account_form'); ?>
                 </div>
             </div>
         </div>       
+    
+    
     </div>
 
     <div class="classima-form-section">
@@ -301,7 +316,7 @@ do_action('rtcl_before_edit_account_form'); ?>
             </div>
         </div>
 
-     </div>
+    </div>
 
     <?php do_action( 'rtcl_edit_account_form' ); ?>
 
@@ -312,6 +327,7 @@ do_action('rtcl_before_edit_account_form'); ?>
         <div class="col-sm-9 col-12">
             <div class="form-group">
                 <input type="submit" name="submit" class="btn rtcl-submit-btn" value="<?php esc_html_e( 'Update Account', 'classima' ); ?>" />
+
             </div>
         </div>
     </div>
@@ -320,5 +336,9 @@ do_action('rtcl_before_edit_account_form'); ?>
 
     <?php do_action( 'rtcl_edit_account_form_end' ); ?>
 </form>
+
+
+
+
 
 <?php do_action( 'rtcl_after_edit_account_form' ); ?>
