@@ -1157,19 +1157,25 @@ class Functions
                 'radio',
                 'date'
             );
-            $icons = Options::get_icon_list();
             $c_ids =  Functions::get_custom_field_ids($args["parent"]);
             $filters = !empty($_GET['filters']) ? $_GET['filters'] : array();
-            //Functions:: pre($icons);
+            $id = apply_filters('rtcl_listing_get_custom_field_group_ids', [],$args["parent"]);
+            $get_icon = get_field("select_icon",$id[0]);
+            $icon = !empty($get_icon) ? $get_icon : '' ;
+
             if (isset($c_ids)&&!empty($c_ids)) {
                 $html .= '<div id="filter" level ="'.$level.'" name="" class ="filter-abdoadz">' ;
 
                 $i = 1;
                 foreach ($c_ids as $c_id) {
                     $field = new RtclCFGField($c_id);
+
                     if (in_array($field->getType(), $filterTypes) && $field->isSearchable()) {
                         $field_html = $isOpen = null;
                         $metaKey = $field->getMetaKey();
+                 
+
+
                         if ($field->getType() == "number") {
                             $fMinValue = !empty($filters[$metaKey]['min']) ? esc_attr($filters[$metaKey]['min']) : null;
                             $fMaxValue = !empty($filters[$metaKey]['max']) ? esc_attr($filters[$metaKey]['max']) : null;
@@ -1245,6 +1251,7 @@ class Functions
 
                         $html .= apply_filters('rtcl_widget_filter_custom_field_html', sprintf('
                                     <div  class="rtcl-custom-field-filter rtcl-custom-field-filter-%s ui-accordion-item %s" style="margin-top: 15px;">
+                                        <i class="'.$icon.' icon-abdoadz" ></i>
                                         <span class="title-abdoadz">%s</span>
                                         <div class="">%s</div>
                                     </div>',

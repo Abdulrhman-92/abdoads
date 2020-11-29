@@ -268,5 +268,12 @@ function create_custom_abdoads_registration_form(){
 	
 	return $templet;
 }
+
 add_shortcode('abdoads_registration_form', 'create_custom_abdoads_registration_form'); 
+
+function abdoadz_icon_font_awesome() {
+	wp_enqueue_style('abdoadz',rtcl()->get_assets_uri("css/abdoadz.css"));
+}
+add_action( 'admin_enqueue_scripts', 'abdoadz_icon_font_awesome' );
+
 new Classima_Main;

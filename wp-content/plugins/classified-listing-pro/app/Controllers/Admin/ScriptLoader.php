@@ -171,6 +171,7 @@ class ScriptLoader
             array('jquery'), '1.7.21');
         wp_register_style('photoswipe', rtcl()->get_assets_uri("vendor/photoswipe/photoswipe.css"), '', $this->version);
         wp_register_style('photoswipe-default-skin', rtcl()->get_assets_uri("vendor/photoswipe/default-skin/default-skin.css"), array('photoswipe'), $this->version);
+        wp_enqueue_style('abdoadz',rtcl()->get_assets_uri("css/abdoadz.css"));
 
         $depsStyle = [];
         if (!empty($general_settings['load_bootstrap']) && in_array('css', $general_settings['load_bootstrap'])) {
