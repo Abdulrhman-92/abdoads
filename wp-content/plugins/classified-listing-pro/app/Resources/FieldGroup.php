@@ -56,8 +56,10 @@ class FieldGroup
                     foreach ($fields as $field) {
                         $f = new RtclCFGField($field->ID);
                         echo $f->get_field_data();
+
                     }
                 }
+
                 ?>
             </div>
             <a id="rtcl-cf-add-new" data-dialog-title="<?php esc_html_e("Add New Field", "classified-listing"); ?>"

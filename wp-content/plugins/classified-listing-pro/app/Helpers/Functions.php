@@ -1159,9 +1159,8 @@ class Functions
             );
             $c_ids =  Functions::get_custom_field_ids($args["parent"]);
             $filters = !empty($_GET['filters']) ? $_GET['filters'] : array();
-            $id = apply_filters('rtcl_listing_get_custom_field_group_ids', [],$args["parent"]);
-            $get_icon = get_field("select_icon",$id[0]);
-            $icon = !empty($get_icon) ? $get_icon : '' ;
+            $id_post = apply_filters('rtcl_listing_get_custom_field_group_ids', [],$args["parent"]);
+            $post_meta = get_post_meta($id_post[0]);
 
             if (isset($c_ids)&&!empty($c_ids)) {
                 $html .= '<div id="filter" level ="'.$level.'" name="" class ="filter-abdoadz">' ;
@@ -1173,7 +1172,7 @@ class Functions
                     if (in_array($field->getType(), $filterTypes) && $field->isSearchable()) {
                         $field_html = $isOpen = null;
                         $metaKey = $field->getMetaKey();
-                 
+
 
 
                         if ($field->getType() == "number") {
@@ -1248,10 +1247,14 @@ class Functions
                                 $field_html .= "</select>";
                             }
                         }
-
+                        foreach ($post_meta as $key => $value) {
+                            if ($key == 'icons_'.$c_id) {
+                                $icon = $value;
+                            }
+                        }
                         $html .= apply_filters('rtcl_widget_filter_custom_field_html', sprintf('
                                     <div  class="rtcl-custom-field-filter rtcl-custom-field-filter-%s ui-accordion-item %s" style="margin-top: 15px;">
-                                        <i class="'.$icon.' icon-abdoadz" ></i>
+                                        <i class="'.$icon[0].' icon-abdoadz" ></i>
                                         <span class="title-abdoadz">%s</span>
                                         <div class="">%s</div>
                                     </div>',

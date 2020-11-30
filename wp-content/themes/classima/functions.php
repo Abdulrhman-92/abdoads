@@ -274,7 +274,7 @@ add_shortcode('abdoads_registration_form', 'create_custom_abdoads_registration_f
 function abdoadz_icon_font_awesome() {
 	wp_enqueue_style('abdoadz',rtcl()->get_assets_uri("css/abdoadz.css"));
 	wp_enqueue_style('abdoadz_font_awesome','https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
-
+	wp_enqueue_style('font-awesome', 'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'); 
 }
 add_action( 'admin_enqueue_scripts', 'abdoadz_icon_font_awesome' );
 

@@ -36,6 +36,8 @@ class InlineSearchAjax
         add_action('wp_ajax_nopriv_rtcl_json_search_taxonomy', [__CLASS__, 'rtcl_inline_search_autocomplete']);
         add_action('wp_ajax_rtcl_ajax_taxonomy_filter_get_sub_level_html', [__CLASS__, 'rtcl_ajax_taxonomy_filter_get_sub_level_html']);
         add_action('wp_ajax_nopriv_rtcl_ajax_taxonomy_filter_get_sub_level_html', [__CLASS__, 'rtcl_ajax_taxonomy_filter_get_sub_level_html']);
+        add_action('wp_ajax_icons_abdoadz', [__CLASS__, 'icons_abdoadz']);
+        add_action('wp_ajax_nopriv_icons_abdoadz', [__CLASS__, 'icons_abdoadz']);
     }
 
     /**
@@ -119,7 +121,21 @@ class InlineSearchAjax
         wp_send_json_success( Functions::get_sub_terms_filter_html($args));
 
     }
+    static function icons_abdoadz(){
+        $value                  =   (isset($_REQUEST["value"])) ? $_REQUEST["value"] : '';
+        $post_id                =   (isset($_REQUEST["post_id"])) ? $_REQUEST["post_id"] : '';  
+        $meta_key               =   (isset($_REQUEST["id_feild"])) ? $_REQUEST["id_feild"] : '';
+        $post_meta_key_exsist   =   !empty(get_post_meta($post_id, $meta_key)) ? 1 : 0 ;
+        
+        //Functions::pre($meta_key );
+       
+        if($post_meta_key_exsist == 1){
+            update_post_meta($post_id, $meta_key,  $value);
+        }else{
+            add_post_meta( $post_id, $meta_key , $value );
 
+        }
+    }
     public static function rtcl_inline_search_autocomplete() {
         $suggestions = [];
         if (!Functions::verify_nonce()) {
